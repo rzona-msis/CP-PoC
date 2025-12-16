@@ -31,18 +31,22 @@ try:
         print("=" * 60, flush=True)
         print("Financial database not found. Initializing...", flush=True)
         print("=" * 60, flush=True)
-        init_financial_database()
-        seed_financial_data()
-        print("\n" + "=" * 60, flush=True)
-        print("Financial database initialized successfully!", flush=True)
-        print("=" * 60, flush=True)
+        try:
+            init_financial_database()
+            seed_financial_data()
+            print("\n" + "=" * 60, flush=True)
+            print("Financial database initialized successfully!", flush=True)
+            print("=" * 60, flush=True)
+        except Exception as init_error:
+            print(f"WARNING: Could not initialize database: {init_error}", flush=True)
+            print("Application will continue with limited functionality.", flush=True)
     else:
         print("Financial database already exists. Skipping initialization.", flush=True)
 except Exception as e:
-    print(f"ERROR initializing financial database: {e}", flush=True)
+    print(f"WARNING: Database initialization skipped: {e}", flush=True)
     import traceback
     traceback.print_exc()
-    # Continue anyway - database might exist
+    print("Application will continue with limited functionality.", flush=True)
 
 # Create the Flask application
 try:

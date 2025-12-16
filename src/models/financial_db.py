@@ -16,14 +16,26 @@ DATABASE_PATH = os.environ.get('DATABASE_PATH', os.path.join(os.path.dirname(__f
 def get_db_connection():
     """
     Create and return a database connection with row factory.
+    Includes error handling and fallback for missing database.
     
     Returns:
         sqlite3.Connection: Database connection object
+        
+    Raises:
+        Exception: If database cannot be accessed
     """
-    conn = sqlite3.connect(DATABASE_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+    try:
+        # Check if database exists
+        if not os.path.exists(DATABASE_PATH):
+            raise FileNotFoundError(f"Database not found at {DATABASE_PATH}. Please run database initialization.")
+        
+        conn = sqlite3.connect(DATABASE_PATH, timeout=10.0)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
+        return conn
+    except Exception as e:
+        print(f"ERROR: Could not connect to database: {e}")
+        raise Exception(f"Database connection failed: {str(e)}")
 
 
 def init_financial_database():

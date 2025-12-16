@@ -5,24 +5,40 @@ This module provides routes for duplicate detection and master data quality mana
 """
 
 from flask import Blueprint, render_template, request, jsonify
-from src.services.llm_service import get_llm_service
-from src.data_access.master_data_dal import MasterDataDAL
 import traceback
 
 master_data_bp = Blueprint('master_data', __name__)
-llm_service = get_llm_service()
-master_data_dal = MasterDataDAL()
+
+# Initialize services with error handling
+try:
+    from src.services.llm_service import get_llm_service
+    llm_service = get_llm_service()
+except Exception as e:
+    print(f"Warning: LLM service initialization failed: {e}")
+    llm_service = None
+
+try:
+    from src.data_access.master_data_dal import MasterDataDAL
+    master_data_dal = MasterDataDAL()
+except Exception as e:
+    print(f"Warning: Master Data DAL initialization failed: {e}")
+    master_data_dal = None
 
 
 @master_data_bp.route('/master-data-matching')
 def matching_page():
     """Render the master data matching interface"""
     try:
-        # Get statistics
-        stats = master_data_dal.get_duplicate_statistics()
+        # Get statistics if DAL is available
+        stats = {}
+        recent_matches = []
         
-        # Get recent match results
-        recent_matches = master_data_dal.get_match_results(limit=10)
+        if master_data_dal:
+            try:
+                stats = master_data_dal.get_duplicate_statistics()
+                recent_matches = master_data_dal.get_match_results(limit=10)
+            except Exception as dal_error:
+                print(f"Warning: Could not load master data stats: {dal_error}")
         
         return render_template(
             'master_data_matching.html',
@@ -32,7 +48,11 @@ def matching_page():
     except Exception as e:
         print(f"Error loading master data matching page: {e}")
         traceback.print_exc()
-        return render_template('master_data_matching.html', error=str(e))
+        # Always return a valid page
+        return render_template('master_data_matching.html', 
+                             stats={}, 
+                             recent_matches=[],
+                             error=str(e)), 200
 
 
 @master_data_bp.route('/api/find-duplicates', methods=['POST'])
@@ -52,6 +72,13 @@ def find_duplicates():
         JSON with list of duplicate pairs and match details
     """
     try:
+        # Check if services are available
+        if not master_data_dal:
+            return jsonify({
+                'success': False,
+                'error': 'Master data services are not available. Please check server configuration.'
+            }), 503
+        
         data = request.get_json()
         
         if not data or 'entity_type' not in data:

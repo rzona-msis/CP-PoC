@@ -5,22 +5,40 @@ This module provides routes for natural language financial queries and analysis.
 """
 
 from flask import Blueprint, render_template, request, jsonify
-from src.services.llm_service import get_llm_service
-from src.data_access.financial_dal import FinancialDAL
 import traceback
 
 financial_bp = Blueprint('financial', __name__)
-llm_service = get_llm_service()
-financial_dal = FinancialDAL()
+
+# Initialize services with error handling
+try:
+    from src.services.llm_service import get_llm_service
+    llm_service = get_llm_service()
+except Exception as e:
+    print(f"Warning: LLM service initialization failed: {e}")
+    llm_service = None
+
+try:
+    from src.data_access.financial_dal import FinancialDAL
+    financial_dal = FinancialDAL()
+except Exception as e:
+    print(f"Warning: Financial DAL initialization failed: {e}")
+    financial_dal = None
 
 
 @financial_bp.route('/financial-analysis')
 def analysis_page():
     """Render the financial analysis interface"""
     try:
-        # Get some summary stats for the dashboard
-        regional_summary = financial_dal.get_regional_summary()
-        product_performance = financial_dal.get_product_performance(limit=5)
+        # Get some summary stats for the dashboard if DAL is available
+        regional_summary = []
+        product_performance = []
+        
+        if financial_dal:
+            try:
+                regional_summary = financial_dal.get_regional_summary()
+                product_performance = financial_dal.get_product_performance(limit=5)
+            except Exception as dal_error:
+                print(f"Warning: Could not load dashboard data: {dal_error}")
         
         return render_template(
             'financial_analysis.html',
@@ -30,7 +48,11 @@ def analysis_page():
     except Exception as e:
         print(f"Error loading financial analysis page: {e}")
         traceback.print_exc()
-        return render_template('financial_analysis.html', error=str(e))
+        # Always return a valid page, even with errors
+        return render_template('financial_analysis.html', 
+                             regional_summary=[], 
+                             product_performance=[],
+                             error=str(e)), 200
 
 
 @financial_bp.route('/api/analyze', methods=['POST'])
@@ -47,6 +69,13 @@ def analyze_financial_query():
         JSON with SQL, results, anomalies, LLM summary
     """
     try:
+        # Check if services are available
+        if not financial_dal or not llm_service:
+            return jsonify({
+                'success': False,
+                'error': 'Financial services are not available. Please check server configuration.'
+            }), 503
+        
         data = request.get_json()
         
         if not data or 'query' not in data:
