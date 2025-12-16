@@ -10,13 +10,21 @@ import random
 import os
 import json
 
+# Determine database path - support both environment variable and default
+# Handle hosted environments that may set DATABASE_PATH to /app/data/campus_hub.db
 DATABASE_PATH = os.environ.get('DATABASE_PATH', os.path.join(os.path.dirname(__file__), '..', 'tmhna_financial.db'))
+
+# Ensure database directory exists
+DATABASE_DIR = os.path.dirname(DATABASE_PATH)
+if DATABASE_DIR and not os.path.exists(DATABASE_DIR):
+    print(f"Creating database directory: {DATABASE_DIR}")
+    os.makedirs(DATABASE_DIR, exist_ok=True)
 
 
 def get_db_connection():
     """
     Create and return a database connection with row factory.
-    Includes error handling and fallback for missing database.
+    Creates the database file if it doesn't exist.
     
     Returns:
         sqlite3.Connection: Database connection object
@@ -25,10 +33,13 @@ def get_db_connection():
         Exception: If database cannot be accessed
     """
     try:
-        # Check if database exists
-        if not os.path.exists(DATABASE_PATH):
-            raise FileNotFoundError(f"Database not found at {DATABASE_PATH}. Please run database initialization.")
+        # Ensure database directory exists
+        db_dir = os.path.dirname(DATABASE_PATH)
+        if db_dir and not os.path.exists(db_dir):
+            print(f"Creating database directory: {db_dir}")
+            os.makedirs(db_dir, exist_ok=True)
         
+        # Connect to database (will create file if it doesn't exist)
         conn = sqlite3.connect(DATABASE_PATH, timeout=10.0)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")
