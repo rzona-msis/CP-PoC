@@ -29,22 +29,27 @@ class FinancialDAL:
         Returns:
             List of dictionaries representing rows
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        
         try:
-            cursor.execute(sql_query)
-            rows = cursor.fetchall()
+            conn = get_db_connection()
+            cursor = conn.cursor()
             
-            # Convert sqlite3.Row objects to dicts
-            results = [dict(row) for row in rows]
-            
-            conn.close()
-            return results
-            
-        except sqlite3.Error as e:
-            conn.close()
-            raise Exception(f"Database query error: {str(e)}")
+            try:
+                cursor.execute(sql_query)
+                rows = cursor.fetchall()
+                
+                # Convert sqlite3.Row objects to dicts
+                results = [dict(row) for row in rows]
+                
+                conn.close()
+                return results
+                
+            except sqlite3.Error as e:
+                conn.close()
+                raise Exception(f"Database query error: {str(e)}")
+        except Exception as e:
+            # Database connection failed - return empty results
+            print(f"WARNING: Database connection failed in execute_query: {e}")
+            return []
     
     def detect_anomalies(self, results: List[Dict[str, Any]], threshold_std: float = 2.0) -> List[str]:
         """
