@@ -227,7 +227,6 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
                 
                 displayDuplicates(window.originalDuplicates, entityType);
                 resultsPanel.style.display = 'block';
-                resultsPanel.scrollIntoView({ behavior: 'smooth' });
                 
                 // Show the search field after finding duplicates
                 const searchFieldContainer = document.getElementById('searchFieldContainer');
@@ -235,11 +234,17 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
                     searchFieldContainer.style.display = 'block';
                 }
                 
-                // Set up search and filter event listeners
-                setupSearchAndFilters();
+                // Scroll to results after everything is displayed
+                setTimeout(() => {
+                    resultsPanel.scrollIntoView({ behavior: 'smooth' });
+                    // Set up search and filter event listeners after DOM is stable
+                    setupSearchAndFilters();
+                }, 100);
             } else {
-                console.error('Required DOM elements not found');
-                alert('Error: Page elements not properly loaded');
+                console.error('Required DOM elements not found', {
+                    countElement: !!countElement,
+                    listElement: !!listElement
+                });
             }
         } else {
             alert('Error: ' + (data.error || 'Unknown error occurred'));
@@ -442,31 +447,33 @@ function setupSearchAndFilters() {
     const fieldFilter = document.getElementById('fieldFilter');
     const confidenceFilter = document.getElementById('confidenceFilter');
     
+    console.log('setupSearchAndFilters called', {
+        searchInput: !!searchInput,
+        fieldFilter: !!fieldFilter,
+        confidenceFilter: !!confidenceFilter
+    });
+    
     // Check if all elements exist
     if (!searchInput || !fieldFilter || !confidenceFilter) {
-        console.error('Search/filter elements not found', {
-            searchInput: !!searchInput,
-            fieldFilter: !!fieldFilter,
-            confidenceFilter: !!confidenceFilter
-        });
+        console.error('Search/filter elements not found');
+        // Don't throw error, just skip setup
         return;
     }
     
-    // Remove old event listeners by cloning and replacing
-    const newSearchInput = searchInput.cloneNode(true);
-    const newFieldFilter = fieldFilter.cloneNode(true);
-    const newConfidenceFilter = confidenceFilter.cloneNode(true);
-    
-    searchInput.parentNode.replaceChild(newSearchInput, searchInput);
-    fieldFilter.parentNode.replaceChild(newFieldFilter, fieldFilter);
-    confidenceFilter.parentNode.replaceChild(newConfidenceFilter, confidenceFilter);
-    
-    // Add event listeners to new elements
-    const applyFilters = () => filterAndDisplayDuplicates();
-    
-    newSearchInput.addEventListener('input', applyFilters);
-    newFieldFilter.addEventListener('change', applyFilters);
-    newConfidenceFilter.addEventListener('change', applyFilters);
+    // Use flag to prevent duplicate listeners
+    if (!window.filtersInitialized) {
+        window.filtersInitialized = true;
+        
+        const applyFilters = () => filterAndDisplayDuplicates();
+        
+        searchInput.addEventListener('input', applyFilters);
+        fieldFilter.addEventListener('change', applyFilters);
+        confidenceFilter.addEventListener('change', applyFilters);
+        
+        console.log('Event listeners attached successfully');
+    } else {
+        console.log('Filters already initialized, skipping listener setup');
+    }
 }
 
 function filterAndDisplayDuplicates() {
