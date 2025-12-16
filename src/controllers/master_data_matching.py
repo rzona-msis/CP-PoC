@@ -106,8 +106,16 @@ def find_duplicates():
         
         # Find potential duplicates using rule-based matching
         print("Step 1: Rule-based duplicate detection...")
-        duplicates = master_data_dal.find_potential_duplicates(entity_type, threshold, search_field)
-        print(f"Found {len(duplicates)} potential duplicate pairs")
+        try:
+            duplicates = master_data_dal.find_potential_duplicates(entity_type, threshold, search_field)
+            print(f"Found {len(duplicates)} potential duplicate pairs")
+        except Exception as dal_error:
+            print(f"ERROR in find_potential_duplicates: {dal_error}")
+            traceback.print_exc()
+            return jsonify({
+                'success': False,
+                'error': f'Database error: {str(dal_error)}'
+            }), 500
         
         # Handle case where no duplicates found
         if not duplicates or len(duplicates) == 0:

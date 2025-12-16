@@ -44,6 +44,8 @@ class MasterDataDAL:
         if limit:
             query += f" LIMIT {limit}"
         
+        print(f"Querying table: {table_name} with query: {query}")
+        
         conn = None
         try:
             conn = get_db_connection()
@@ -53,10 +55,13 @@ class MasterDataDAL:
             rows = cursor.fetchall()
             results = [dict(row) for row in rows]
             
+            print(f"Retrieved {len(results)} {entity_type} entities from database")
             return results
         except Exception as e:
             # Database connection failed - return empty results
             print(f"WARNING: Database connection failed in get_entities_by_type: {e}")
+            import traceback
+            traceback.print_exc()
             return []
         finally:
             if conn:

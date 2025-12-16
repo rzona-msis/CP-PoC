@@ -170,6 +170,12 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
     const useLLM = document.getElementById('useLLM').checked;
     const searchField = document.getElementById('searchField').value;
     
+    console.log('=== Starting Duplicate Search ===');
+    console.log('Entity Type:', entityType);
+    console.log('Threshold:', threshold);
+    console.log('Use LLM:', useLLM);
+    console.log('Search Field:', searchField);
+    
     if (!entityType) {
         alert('Please select an entity type');
         return;
@@ -179,9 +185,13 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
     const resultsPanel = document.getElementById('resultsPanel');
     const findBtn = document.getElementById('findBtn');
     
-    // Reset previous results
+    // Reset previous results and state
     window.originalDuplicates = [];
     window.currentEntityType = null;
+    const duplicatesList = document.getElementById('duplicatesList');
+    if (duplicatesList) {
+        duplicatesList.innerHTML = '';
+    }
     
     loadingSpinner.style.display = 'block';
     resultsPanel.style.display = 'none';
