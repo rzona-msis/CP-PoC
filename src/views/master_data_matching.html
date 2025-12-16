@@ -226,6 +226,8 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
                 populateFieldFilter(entityType);
                 
                 displayDuplicates(window.originalDuplicates, entityType);
+                
+                // Show results panel BEFORE trying to set up filters
                 resultsPanel.style.display = 'block';
                 
                 // Show the search field after finding duplicates
@@ -234,12 +236,27 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
                     searchFieldContainer.style.display = 'block';
                 }
                 
-                // Scroll to results after everything is displayed
-                setTimeout(() => {
-                    resultsPanel.scrollIntoView({ behavior: 'smooth' });
-                    // Set up search and filter event listeners after DOM is stable
-                    setupSearchAndFilters();
-                }, 100);
+                // Set up search and filter event listeners only if elements exist
+                // Wait for DOM to be fully visible before setting up
+                requestAnimationFrame(() => {
+                    const searchInput = document.getElementById('searchInput');
+                    const fieldFilter = document.getElementById('fieldFilter');
+                    const confidenceFilter = document.getElementById('confidenceFilter');
+                    
+                    if (searchInput && fieldFilter && confidenceFilter) {
+                        setupSearchAndFilters();
+                        // Scroll after setup is complete
+                        resultsPanel.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        console.error('Filter elements not found after display', {
+                            searchInput: !!searchInput,
+                            fieldFilter: !!fieldFilter,
+                            confidenceFilter: !!confidenceFilter
+                        });
+                        // Still scroll even if filters fail
+                        resultsPanel.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
             } else {
                 console.error('Required DOM elements not found', {
                     countElement: !!countElement,
@@ -443,36 +460,43 @@ function populateFieldFilter(entityType) {
 }
 
 function setupSearchAndFilters() {
+    console.log('setupSearchAndFilters: Attempting to set up filters');
+    
     const searchInput = document.getElementById('searchInput');
     const fieldFilter = document.getElementById('fieldFilter');
     const confidenceFilter = document.getElementById('confidenceFilter');
     
-    console.log('setupSearchAndFilters called', {
+    console.log('Element check:', {
         searchInput: !!searchInput,
         fieldFilter: !!fieldFilter,
-        confidenceFilter: !!confidenceFilter
+        confidenceFilter: !!confidenceFilter,
+        alreadyInitialized: !!window.filtersInitialized
     });
     
-    // Check if all elements exist
+    // If elements don't exist, just return silently
     if (!searchInput || !fieldFilter || !confidenceFilter) {
-        console.error('Search/filter elements not found');
-        // Don't throw error, just skip setup
+        console.warn('Some filter elements not found, skipping setup');
         return;
     }
     
-    // Use flag to prevent duplicate listeners
+    // Only set up listeners once
     if (!window.filtersInitialized) {
-        window.filtersInitialized = true;
-        
-        const applyFilters = () => filterAndDisplayDuplicates();
+        const applyFilters = () => {
+            try {
+                filterAndDisplayDuplicates();
+            } catch (e) {
+                console.error('Error in filterAndDisplayDuplicates:', e);
+            }
+        };
         
         searchInput.addEventListener('input', applyFilters);
         fieldFilter.addEventListener('change', applyFilters);
         confidenceFilter.addEventListener('change', applyFilters);
         
-        console.log('Event listeners attached successfully');
+        window.filtersInitialized = true;
+        console.log('✓ Event listeners attached successfully');
     } else {
-        console.log('Filters already initialized, skipping listener setup');
+        console.log('Filters already initialized, reusing existing listeners');
     }
 }
 
