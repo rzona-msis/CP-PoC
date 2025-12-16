@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Moderate Reviews - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4 mb-5">
+    <h1 class="mb-4"><i class="bi bi-chat-square-text"></i> Review Moderation</h1>
+    
+    <!-- Reviews Table -->
+    <div class="card">
+        <div class="card-body">
+            {% if reviews %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Resource</th>
+                            <th>Reviewer</th>
+                            <th>Rating</th>
+                            <th>Comment</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for review in reviews %}
+                        <tr class="{% if review.is_hidden %}table-secondary opacity-50{% endif %}">
+                            <td>{{ review.review_id }}</td>
+                            <td>
+                                <strong>{{ review.resource_title }}</strong>
+                            </td>
+                            <td>{{ review.reviewer_name }}</td>
+                            <td>
+                                <span class="rating-stars">
+                                    {% for i in range(review.rating) %}★{% endfor %}
+                                </span>
+                                <small class="text-muted">({{ review.rating }}/5)</small>
+                            </td>
+                            <td>
+                                {% if review.comment %}
+                                    <p class="mb-0 small">{{ (review.comment[:100] + '...') if review.comment|length > 100 else review.comment }}</p>
+                                {% else %}
+                                    <span class="text-muted">No comment</span>
+                                {% endif %}
+                            </td>
+                            <td><small>{{ review.timestamp }}</small></td>
+                            <td>
+                                {% if review.is_hidden %}
+                                    <span class="badge bg-danger">Hidden</span>
+                                {% else %}
+                                    <span class="badge bg-success">Visible</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    {% if review.is_hidden %}
+                                    <form method="POST" action="{{ url_for('admin.unhide_review', review_id=review.review_id) }}" 
+                                          style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-success" 
+                                                title="Unhide review">
+                                            <i class="bi bi-eye"></i> Unhide
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <form method="POST" action="{{ url_for('admin.hide_review', review_id=review.review_id) }}" 
+                                          onsubmit="return confirm('Hide this review? It will no longer be visible to users.');" 
+                                          style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                title="Hide review">
+                                            <i class="bi bi-eye-slash"></i> Hide
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-chat-left-text fs-1 text-muted d-block mb-3"></i>
+                <p class="text-muted">No reviews found.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Moderation Guidelines -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Moderation Guidelines</h5>
+        </div>
+        <div class="card-body">
+            <ul class="mb-0">
+                <li>Hide reviews that contain inappropriate content, spam, or false information</li>
+                <li>Hidden reviews are not visible to users but remain in the database</li>
+                <li>You can unhide reviews if they were hidden by mistake</li>
+                <li>All moderation actions are logged for audit purposes</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Campus Resource Hub{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Welcome to Campus Resource Hub</h1>
+        <p class="lead">Discover and book campus resources including study rooms, equipment, labs, and more.</p>
+    </div>
+</div>
+
+<!-- Search Section -->
+<section aria-labelledby="search-heading" class="mb-5">
+    <h2 id="search-heading" class="h3 mb-3">Search Resources</h2>
+    <form action="{{ url_for('main.search') }}" method="get" role="search" class="row g-3">
+        <div class="col-md-6">
+            <label for="search-query" class="form-label">Search by keyword</label>
+            <input type="text" class="form-control" id="search-query" name="q" 
+                   placeholder="Enter keywords..." aria-describedby="search-help">
+            <small id="search-help" class="form-text text-muted">
+                Search for resource titles, descriptions, or locations
+            </small>
+        </div>
+        <div class="col-md-3">
+            <label for="category-select" class="form-label">Category</label>
+            <select class="form-select" id="category-select" name="category">
+                <option value="" selected>All Categories</option>
+                <option value="study_room">Study Rooms</option>
+                <option value="equipment">Equipment</option>
+                <option value="lab">Labs</option>
+                <option value="event_space">Event Spaces</option>
+                <option value="tutoring">Tutoring</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="location-input" class="form-label">Location</label>
+            <input type="text" class="form-control" id="location-input" name="location" 
+                   placeholder="Building or area">
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">
+                <span aria-hidden="true">🔍</span> Search
+            </button>
+        </div>
+    </form>
+</section>
+
+<!-- Featured Resources -->
+<section aria-labelledby="featured-heading">
+    <h2 id="featured-heading" class="h3 mb-4">Featured Resources</h2>
+    
+    {% if resources %}
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for resource in resources[:6] %}
+        <div class="col">
+            <article class="card h-100" aria-labelledby="resource-{{ resource.resource_id }}-title">
+                {% if resource.images %}
+                <img src="{{ resource.images.split(',')[0] }}" class="card-img-top" 
+                     alt="Image of {{ resource.title }}">
+                {% else %}
+                <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" 
+                     style="height: 200px;" role="img" aria-label="No image available for {{ resource.title }}">
+                    <span aria-hidden="true">📦</span>
+                </div>
+                {% endif %}
+                
+                <div class="card-body">
+                    <h3 id="resource-{{ resource.resource_id }}-title" class="card-title h5">
+                        {{ resource.title }}
+                    </h3>
+                    <p class="card-text">{{ resource.description[:100] }}...</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-info">{{ resource.category|replace('_', ' ')|title }}</span>
+                        <span class="text-muted small" aria-label="Location">
+                            <span aria-hidden="true">📍</span> {{ resource.location }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('resources.detail', resource_id=resource.resource_id) }}" 
+                       class="btn btn-sm btn-outline-primary stretched-link"
+                       aria-label="View details for {{ resource.title }}">
+                        View Details
+                    </a>
+                </div>
+            </article>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info" role="status">
+        <p class="mb-0">No resources available yet. Check back soon!</p>
+    </div>
+    {% endif %}
+    
+    <div class="text-center mt-4">
+        <a href="{{ url_for('resources.list_resources') }}" class="btn btn-primary" 
+           aria-label="Browse all available resources">
+            Browse All Resources
+        </a>
+    </div>
+</section>
+
+<!-- Quick Links for Authenticated Users -->
+{% if current_user.is_authenticated %}
+<section aria-labelledby="quick-links-heading" class="mt-5">
+    <h2 id="quick-links-heading" class="h3 mb-3">Quick Links</h2>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title h5">My Bookings</h3>
+                    <p class="card-text">View and manage your resource bookings.</p>
+                    <a href="{{ url_for('bookings.my_bookings') }}" class="btn btn-sm btn-outline-primary">
+                        Go to Bookings
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title h5">Messages</h3>
+                    <p class="card-text">Check your messages and communicate with others.</p>
+                    <a href="{{ url_for('messages.inbox') }}" class="btn btn-sm btn-outline-primary">
+                        Go to Inbox
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% if current_user.is_staff() %}
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title h5">Create Resource</h3>
+                    <p class="card-text">Add a new resource to the platform.</p>
+                    <a href="{{ url_for('resources.create') }}" class="btn btn-sm btn-outline-primary">
+                        Create New
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

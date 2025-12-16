@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard - Campus Resource Hub{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <h1 class="mb-4"><i class="bi bi-graph-up"></i> Analytics Dashboard</h1>
+    
+    <!-- FREE Export Options -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-download"></i> FREE Data Export (No Cloud Costs!)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill"></i> <strong>100% FREE</strong> - Export your data without any cloud costs!
+                    </div>
+                    <p class="mb-3">Export analytics data for use with Google Sheets, Excel, or other free tools:</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="/analytics/export/csv/all" class="btn btn-success">
+                            <i class="bi bi-file-earmark-spreadsheet"></i> Download CSV
+                        </a>
+                        <button class="btn btn-outline-success" onclick="downloadJSON()">
+                            <i class="bi bi-file-earmark-code"></i> Download JSON
+                        </button>
+                        <button class="btn btn-outline-success" onclick="copySheetsData()">
+                            <i class="bi bi-clipboard"></i> Copy for Google Sheets
+                        </button>
+                        <button class="btn btn-outline-info" onclick="showGoogleSheetsGuide()">
+                            <i class="bi bi-question-circle"></i> How to Use
+                        </button>
+                    </div>
+                    <p class="mt-3 mb-0 small text-muted">
+                        <i class="bi bi-lightbulb"></i> <strong>Tip:</strong> Import CSV into Google Sheets, then connect Looker Studio to Sheets for free dashboards!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- BigQuery (Optional - Costs Money) -->
+    {% if is_gcp_enabled %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <details class="card">
+                <summary class="card-header" style="cursor: pointer;">
+                    <h5 class="mb-0 d-inline"><i class="bi bi-cloud"></i> BigQuery Export (Optional - Has Costs)</h5>
+                    <span class="badge bg-warning text-dark ms-2">~$0.10/month</span>
+                </summary>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> BigQuery is configured but has minimal costs
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-primary" onclick="initializeBigQuery()">
+                            <i class="bi bi-gear"></i> Initialize BigQuery
+                        </button>
+                        <button class="btn btn-sm btn-primary" onclick="exportAllData()">
+                            <i class="bi bi-upload"></i> Export to BigQuery
+                        </button>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-primary">{{ metrics.total_users }}</h3>
+                    <p class="mb-0">Total Users</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-success">{{ metrics.total_resources }}</h3>
+                    <p class="mb-0">Active Resources</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-info">{{ metrics.total_bookings }}</h3>
+                    <p class="mb-0">Total Bookings</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-warning">{{ metrics.bookings_by_status.get('approved', 0) }}</h3>
+                    <p class="mb-0">Approved Bookings</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Resources by Category -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Resources by Category</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bookings by Status -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Bookings by Status</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Booking Trend -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Booking Trend (Last 30 Days)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top Resources -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Top 10 Most Booked Resources</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Resource</th>
+                                    <th>Total Bookings</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for resource in metrics.top_resources %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ resource.title }}</td>
+                                    <td><span class="badge bg-primary">{{ resource.bookings }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="notificationToast" class="toast" role="alert">
+        <div class="toast-header">
+            <strong class="me-auto">Analytics</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="toastMessage"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+<script>
+    // Chart.js configurations
+    const IU_CRIMSON = '#990000';
+    const IU_CREAM = '#F2EFEA';
+    
+    // Resources by Category Chart
+    const categoryData = {{ metrics.resources_by_category | tojson }};
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(categoryData),
+            datasets: [{
+                data: Object.values(categoryData),
+                backgroundColor: [
+                    IU_CRIMSON,
+                    '#7a0000',
+                    '#CC0000',
+                    '#990033',
+                    '#CC3333'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    // Bookings by Status Chart
+    const statusData = {{ metrics.bookings_by_status | tojson }};
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(statusData),
+            datasets: [{
+                label: 'Bookings',
+                data: Object.values(statusData),
+                backgroundColor: IU_CRIMSON,
+                borderColor: '#7a0000',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Booking Trend Chart
+    const trendData = {{ metrics.bookings_trend | tojson }};
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: trendData.map(d => d.date),
+            datasets: [{
+                label: 'Daily Bookings',
+                data: trendData.map(d => d.count),
+                borderColor: IU_CRIMSON,
+                backgroundColor: 'rgba(153, 0, 0, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Helper function to show toast notifications
+    function showToast(message, isSuccess = true) {
+        const toastEl = document.getElementById('notificationToast');
+        const messageEl = document.getElementById('toastMessage');
+        messageEl.textContent = message;
+        
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    }
+    
+    // Initialize BigQuery
+    async function initializeBigQuery() {
+        if (!confirm('This will create BigQuery dataset and tables if they don\'t exist. Continue?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('/analytics/api/initialize', {
+                method: 'POST'
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                showToast('BigQuery initialized successfully!', true);
+            } else {
+                showToast('Error initializing BigQuery: ' + data.error, false);
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, false);
+        }
+    }
+    
+    // Export all data
+    async function exportAllData() {
+        if (!confirm('Export all analytics data to BigQuery? This may take a moment.')) {
+            return;
+        }
+        
+        try {
+            showToast('Exporting data to BigQuery...', true);
+            
+            const response = await fetch('/analytics/api/export', {
+                method: 'POST'
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                showToast('All data exported successfully!', true);
+            } else {
+                showToast('Some exports failed. Check console for details.', false);
+                console.error('Export results:', data.results);
+            }
+        } catch (error) {
+            showToast('Error exporting data: ' + error.message, false);
+        }
+    }
+    
+    // Check status
+    async function checkStatus() {
+        try {
+            const response = await fetch('/analytics/api/status');
+            const data = await response.json();
+            
+            const statusInfo = `
+                GCP Enabled: ${data.gcp_enabled}
+                Project ID: ${data.project_id || 'Not set'}
+                Dataset ID: ${data.dataset_id}
+                Credentials: ${data.credentials_configured ? 'Configured' : 'Not configured'}
+                GA Tracking: ${data.ga_measurement_id ? 'Configured' : 'Not configured'}
+            `;
+            
+            alert(statusInfo);
+        } catch (error) {
+            showToast('Error checking status: ' + error.message, false);
+        }
+    }
+</script>
+{% endblock %}
+

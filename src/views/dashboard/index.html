@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Campus Resource Hub{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <h1 class="mb-4"><i class="bi bi-speedometer2"></i> Dashboard</h1>
+    
+    <div class="row g-4 mb-4">
+        <!-- Statistics Cards -->
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-box fs-1 text-primary"></i>
+                    <h3 class="mt-2">{{ resource_stats.total_resources if resource_stats else 0 }}</h3>
+                    <p class="text-muted mb-0">My Resources</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-calendar-check fs-1 text-success"></i>
+                    <h3 class="mt-2">{{ my_bookings|length }}</h3>
+                    <p class="text-muted mb-0">Upcoming Bookings</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-envelope fs-1 text-warning"></i>
+                    <h3 class="mt-2">{{ unread_messages or 0 }}</h3>
+                    <p class="text-muted mb-0">Unread Messages</p>
+                </div>
+            </div>
+        </div>
+        
+        {% if current_user.is_staff() %}
+        <div class="col-md-3">
+            <div class="card text-center h-100 border-warning">
+                <div class="card-body">
+                    <i class="bi bi-clock fs-1 text-warning"></i>
+                    <h3 class="mt-2">{{ pending_approvals|length if pending_approvals else 0 }}</h3>
+                    <p class="text-muted mb-0">Pending Approvals</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if pending_approvals %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i>
+        <strong>You have {{ pending_approvals|length }} booking(s) awaiting your approval.</strong>
+        <a href="{{ url_for('dashboard.pending_approvals') }}" class="alert-link">Review now</a>
+    </div>
+    {% endif %}
+    
+    <div class="row">
+        <!-- My Resources -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-box"></i> My Resources</h5>
+                    <a href="{{ url_for('dashboard.my_resources') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if my_resources %}
+                        <div class="list-group list-group-flush">
+                            {% for resource in my_resources %}
+                            <a href="{{ url_for('resources.view_resource', resource_id=resource.resource_id) }}" 
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ resource.title }}</h6>
+                                        <small class="text-muted">{{ resource.category }}</small>
+                                    </div>
+                                    <span class="badge bg-{{ 'success' if resource.status == 'published' else 'secondary' }}">
+                                        {{ resource.status|title }}
+                                    </span>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <a href="{{ url_for('resources.create_resource') }}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-plus-circle"></i> Create New Resource
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-inbox fs-1 text-muted d-block mb-2"></i>
+                            <p class="text-muted">You haven't created any resources yet.</p>
+                            <a href="{{ url_for('resources.create_resource') }}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-plus-circle"></i> Create Your First Resource
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- My Bookings -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Upcoming Bookings</h5>
+                    <a href="{{ url_for('dashboard.my_bookings') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if my_bookings %}
+                        <div class="list-group list-group-flush">
+                            {% for booking in my_bookings %}
+                            <a href="{{ url_for('bookings.view_booking', booking_id=booking.booking_id) }}" 
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ booking.resource_title }}</h6>
+                                        <small class="text-muted">{{ booking.start_datetime }}</small>
+                                    </div>
+                                    <span class="badge bg-{{ 'success' if booking.status == 'approved' else 'warning' }}">
+                                        {{ booking.status|title }}
+                                    </span>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-calendar-x fs-1 text-muted d-block mb-2"></i>
+                            <p class="text-muted">No upcoming bookings.</p>
+                            <a href="{{ url_for('resources.list_resources') }}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-search"></i> Browse Resources
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <a href="{{ url_for('resources.create_resource') }}" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-plus-circle"></i> Create Resource
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{{ url_for('resources.list_resources') }}" class="btn btn-outline-success w-100">
+                        <i class="bi bi-search"></i> Browse Resources
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{{ url_for('messages.list_threads') }}" class="btn btn-outline-info w-100">
+                        <i class="bi bi-envelope"></i> Messages
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{{ url_for('dashboard.profile') }}" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-person"></i> Profile Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

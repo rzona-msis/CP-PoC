@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ resource.title }} - Campus Resource Hub{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="mb-4"><i class="bi bi-pencil"></i> Edit Resource</h1>
+            
+            <div class="card">
+                <div class="card-body p-4">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Title -->
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else "")) }}
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback">{{ form.title.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Description -->
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", rows="4") }}
+                        </div>
+                        
+                        <!-- Category -->
+                        <div class="mb-3">
+                            {{ form.category.label(class="form-label") }}
+                            {{ form.category(class="form-select" + (" is-invalid" if form.category.errors else "")) }}
+                            {% if form.category.errors %}
+                                <div class="invalid-feedback">{{ form.category.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <!-- Location -->
+                                <div class="mb-3">
+                                    {{ form.location.label(class="form-label") }}
+                                    {{ form.location(class="form-control") }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <!-- Capacity -->
+                                <div class="mb-3">
+                                    {{ form.capacity.label(class="form-label") }}
+                                    {{ form.capacity(class="form-control", type="number") }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Status -->
+                        <div class="mb-3">
+                            {{ form.status.label(class="form-label") }}
+                            {{ form.status(class="form-select") }}
+                        </div>
+                        
+                        <!-- Requires Approval -->
+                        <div class="mb-3 form-check">
+                            {{ form.requires_approval(class="form-check-input") }}
+                            {{ form.requires_approval.label(class="form-check-label") }}
+                        </div>
+                        
+                        <hr>
+                        
+                        <!-- Buttons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Save Changes
+                            </button>
+                            <a href="{{ url_for('resources.view_resource', resource_id=resource.resource_id) }}" 
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,36 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Booking Approved!{% endblock %}
+
+{% block content %}
+<h2>Great News, {{ user_name }}! 🎉</h2>
+
+<p>Your booking request has been <strong style="color: #2D6A4F;">approved</strong>!</p>
+
+<div class="info-box">
+    <strong>📍 Resource:</strong> {{ resource_title }}<br>
+    <strong>🗓️ Date & Time:</strong> {{ start_time }} - {{ end_time }}<br>
+    <strong>📌 Location:</strong> {{ resource_location }}<br>
+    <strong>🎫 Booking ID:</strong> #{{ booking_id }}
+</div>
+
+<p>Your reservation is now confirmed. Please arrive on time and follow any specific guidelines for this resource.</p>
+
+<p style="text-align: center;">
+    <a href="http://localhost:5000/bookings/{{ booking_id }}" class="button">View Booking</a>
+</p>
+
+<p><strong>Quick Reminders:</strong></p>
+<ul>
+    <li>Arrive 5 minutes early</li>
+    <li>Bring your student ID</li>
+    <li>Leave the space as you found it</li>
+    <li>Cancel at least 24 hours in advance if plans change</li>
+</ul>
+
+<p>Enjoy your booking!</p>
+
+<p>Best regards,<br>
+<strong>Campus Resource Hub Team</strong></p>
+{% endblock %}
+

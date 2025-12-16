@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}Create Booking{% if resource %} - {{ resource.title }}{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Enhanced datetime picker styling for IU theme */
+    input[type="datetime-local"] {
+        position: relative;
+        padding: 0.75rem;
+        font-size: 1rem;
+        border: 2px solid #dee2e6;
+        border-radius: 0.375rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    input[type="datetime-local"]:focus {
+        border-color: var(--iu-crimson);
+        box-shadow: 0 0 0 0.2rem rgba(153, 0, 0, 0.25);
+        outline: 0;
+    }
+    
+    input[type="datetime-local"]:hover {
+        border-color: var(--iu-crimson);
+    }
+    
+    /* Calendar icon styling */
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        filter: opacity(0.6);
+        transition: filter 0.2s;
+    }
+    
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+        filter: opacity(1);
+    }
+    
+    /* Make datetime inputs more prominent */
+    .datetime-group {
+        background: var(--iu-cream);
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        border: 2px solid var(--iu-crimson);
+        margin-bottom: 1rem;
+    }
+    
+    .datetime-label {
+        color: var(--iu-crimson);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            {% if resource %}
+            <h1 class="mb-4"><i class="bi bi-calendar-check"></i> Book {{ resource.title }}</h1>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5>Resource Details</h5>
+                    <p><strong>Location:</strong> {{ resource.location or 'TBD' }}</p>
+                    {% if resource.capacity %}
+                    <p><strong>Capacity:</strong> {{ resource.capacity }}</p>
+                    {% endif %}
+                    {% if resource.requires_approval %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        This resource requires approval. Your booking will be pending until approved.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body p-4">
+                    <form method="POST" novalidate id="bookingForm">
+                        {{ form.hidden_tag() }}
+                        {{ form.resource_id }}
+                        
+                        <div class="datetime-group">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="datetime-label">
+                                            <i class="bi bi-calendar-event"></i> Start Date & Time
+                                        </label>
+                                        {{ form.start_datetime(
+                                            class="form-control" + (" is-invalid" if form.start_datetime.errors else ""),
+                                            type="datetime-local",
+                                            id="startDateTime"
+                                        ) }}
+                                        {% if form.start_datetime.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.start_datetime.errors[0] }}</div>
+                                        {% endif %}
+                                        <small class="text-muted">
+                                            <i class="bi bi-info-circle"></i> Click the calendar icon to select date & time
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="datetime-label">
+                                            <i class="bi bi-calendar-check"></i> End Date & Time
+                                        </label>
+                                        {{ form.end_datetime(
+                                            class="form-control" + (" is-invalid" if form.end_datetime.errors else ""),
+                                            type="datetime-local",
+                                            id="endDateTime"
+                                        ) }}
+                                        {% if form.end_datetime.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.end_datetime.errors[0] }}</div>
+                                        {% endif %}
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock"></i> Duration: <span id="duration" class="fw-bold">-</span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info mb-0">
+                                <i class="bi bi-lightbulb"></i> <strong>Quick Duration:</strong>
+                                <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="setDuration(1)">1 hour</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary ms-1" onclick="setDuration(2)">2 hours</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary ms-1" onclick="setDuration(4)">4 hours</button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.notes.label(class="form-label") }}
+                            {{ form.notes(class="form-control", rows="3", placeholder="Optional: describe your booking purpose") }}
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-calendar-check"></i> Request Booking
+                            </button>
+                            <a href="{{ url_for('resources.view_resource', resource_id=resource.resource_id) }}" 
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                Please select a resource to book.
+                <a href="{{ url_for('resources.list_resources') }}">Browse resources</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize datetime inputs with smart defaults
+    document.addEventListener('DOMContentLoaded', function() {
+        const startInput = document.getElementById('startDateTime');
+        const endInput = document.getElementById('endDateTime');
+        const durationSpan = document.getElementById('duration');
+        
+        // Set default values if empty (tomorrow at 9 AM for 2 hours)
+        if (!startInput.value) {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(9, 0, 0, 0);
+            startInput.value = formatDateTimeLocal(tomorrow);
+        }
+        
+        if (!endInput.value && startInput.value) {
+            const start = new Date(startInput.value);
+            const end = new Date(start.getTime() + (2 * 60 * 60 * 1000)); // +2 hours
+            endInput.value = formatDateTimeLocal(end);
+        }
+        
+        // Calculate and display duration
+        function updateDuration() {
+            if (startInput.value && endInput.value) {
+                const start = new Date(startInput.value);
+                const end = new Date(endInput.value);
+                const diff = (end - start) / 1000 / 60; // minutes
+                
+                if (diff <= 0) {
+                    durationSpan.textContent = 'Invalid';
+                    durationSpan.className = 'fw-bold text-danger';
+                } else if (diff < 60) {
+                    durationSpan.textContent = Math.round(diff) + ' minutes';
+                    durationSpan.className = 'fw-bold text-success';
+                } else {
+                    const hours = Math.floor(diff / 60);
+                    const mins = Math.round(diff % 60);
+                    durationSpan.textContent = hours + 'h' + (mins > 0 ? ' ' + mins + 'm' : '');
+                    durationSpan.className = 'fw-bold text-success';
+                }
+            }
+        }
+        
+        // Update duration when inputs change
+        startInput.addEventListener('change', updateDuration);
+        endInput.addEventListener('change', updateDuration);
+        
+        // Initial duration calculation
+        updateDuration();
+    });
+    
+    // Helper function to format date for datetime-local input
+    function formatDateTimeLocal(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+    
+    // Quick duration button handler
+    function setDuration(hours) {
+        const startInput = document.getElementById('startDateTime');
+        const endInput = document.getElementById('endDateTime');
+        
+        if (startInput.value) {
+            const start = new Date(startInput.value);
+            const end = new Date(start.getTime() + (hours * 60 * 60 * 1000));
+            endInput.value = formatDateTimeLocal(end);
+            
+            // Trigger change event to update duration display
+            endInput.dispatchEvent(new Event('change'));
+        } else {
+            alert('Please select a start date & time first');
+            startInput.focus();
+        }
+    }
+    
+    // Auto-adjust end time when start time changes (maintain duration if possible)
+    let lastStartValue = document.getElementById('startDateTime').value;
+    document.getElementById('startDateTime').addEventListener('change', function() {
+        const startInput = this;
+        const endInput = document.getElementById('endDateTime');
+        
+        if (lastStartValue && endInput.value) {
+            // Calculate previous duration
+            const oldStart = new Date(lastStartValue);
+            const oldEnd = new Date(endInput.value);
+            const duration = oldEnd - oldStart;
+            
+            // Apply same duration to new start time
+            if (duration > 0) {
+                const newStart = new Date(startInput.value);
+                const newEnd = new Date(newStart.getTime() + duration);
+                endInput.value = formatDateTimeLocal(newEnd);
+            }
+        }
+        
+        lastStartValue = startInput.value;
+    });
+</script>
+{% endblock %}
+

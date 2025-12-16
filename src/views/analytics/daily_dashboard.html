@@ -1,0 +1,525 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Analytics - Campus Resource Hub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .metric-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid var(--iu-crimson);
+    }
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(153, 0, 0, 0.15);
+    }
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--iu-crimson);
+    }
+    .metric-label {
+        font-size: 0.9rem;
+        color: var(--iu-gray);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+    .stats-table {
+        font-size: 0.9rem;
+    }
+    .stats-table th {
+        background-color: var(--iu-crimson);
+        color: white;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4 mb-5 animate-fade-in-up">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-2">
+                        <i class="bi bi-graph-up-arrow"></i> Daily Booking Analytics
+                    </h1>
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-calendar3"></i> Last {{ daily_metrics.period_days }} days • 
+                        Updated: {{ now.strftime('%B %d, %Y at %I:%M %p') }}
+                    </p>
+                </div>
+                <div>
+                    <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card metric-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="metric-value">{{ daily_metrics.today_bookings }}</div>
+                    <div class="metric-label">Today's Bookings</div>
+                    <small class="text-muted">
+                        <i class="bi bi-calendar-day"></i> {{ now.strftime('%A') }}
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metric-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="metric-value">{{ daily_metrics.week_bookings }}</div>
+                    <div class="metric-label">This Week</div>
+                    <small class="text-muted">
+                        <i class="bi bi-calendar-week"></i> Last 7 days
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metric-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="metric-value">{{ daily_metrics.total_bookings }}</div>
+                    <div class="metric-label">Total Bookings</div>
+                    <small class="text-muted">
+                        <i class="bi bi-calendar-range"></i> Last {{ daily_metrics.period_days }} days
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metric-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="metric-value">{{ daily_metrics.avg_per_day }}</div>
+                    <div class="metric-label">Avg Per Day</div>
+                    <small class="text-muted">
+                        <i class="bi bi-graph-up"></i> Average bookings
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Status Distribution -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up"></i> Booking Timeline (Last 30 Days)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pie-chart"></i> Status Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                    <div class="mt-3">
+                        {% for status, count in daily_metrics.bookings_by_status.items() %}
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="badge bg-secondary">{{ status|title }}</span>
+                            <strong>{{ count }}</strong>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resource Usage Stats -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bar-chart"></i> Top Resources by Bookings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="resourcesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock"></i> Peak Booking Hours
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="peakHoursChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Day of Week Distribution -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-week"></i> Bookings by Day of Week
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="dayOfWeekChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-people"></i> User Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="metric-value" style="font-size: 2rem;">{{ user_activity.active_today }}</div>
+                            <div class="metric-label" style="font-size: 0.75rem;">Active Today</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="metric-value" style="font-size: 2rem;">{{ user_activity.active_week }}</div>
+                            <div class="metric-label" style="font-size: 0.75rem;">Active This Week</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="metric-value" style="font-size: 2rem;">{{ user_activity.new_users }}</div>
+                            <div class="metric-label" style="font-size: 0.75rem;">New Users</div>
+                        </div>
+                    </div>
+                    <hr>
+                    <h6 class="fw-bold mb-3">Top Departments</h6>
+                    {% if user_activity.dept_breakdown %}
+                    <div class="chart-container" style="height: 150px;">
+                        <canvas id="departmentChart"></canvas>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">No department data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operational Insights -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-speedometer2"></i> Operational Insights
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-2">
+                            <div class="metric-value" style="font-size: 2rem;">{{ operational.avg_approval_hours }}h</div>
+                            <div class="metric-label" style="font-size: 0.75rem;">Avg Approval Time</div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="metric-value" style="font-size: 2rem;">{{ operational.cancellation_rate }}%</div>
+                            <div class="metric-label" style="font-size: 0.75rem;">Cancellation Rate</div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="metric-value" style="font-size: 2rem;">{{ operational.waiting_count }}</div>
+                            <div class="metric-label" style="font-size: 0.75rem;">On Waitlist</div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="metric-value" style="font-size: 2rem;">{{ operational.message_count }}</div>
+                            <div class="metric-label" style="font-size: 0.75rem;">Messages Sent</div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="metric-value" style="font-size: 2rem;">{{ operational.review_count }}</div>
+                            <div class="metric-label" style="font-size: 0.75rem;">Reviews</div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="metric-value" style="font-size: 2rem;">{{ lead_time.avg_lead_days }}</div>
+                            <div class="metric-label" style="font-size: 0.75rem;">Avg Lead Time (days)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resource Details Table -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-table"></i> Resource Performance Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Resource</th>
+                                    <th>Category</th>
+                                    <th>Total Bookings</th>
+                                    <th>Completed</th>
+                                    <th>Cancelled</th>
+                                    <th>Cancel Rate</th>
+                                    <th>Avg Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for resource in resource_stats %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('resources.view_resource', resource_id=resource.resource_id) }}" 
+                                           class="text-decoration-none">
+                                            {{ resource.title }}
+                                        </a>
+                                    </td>
+                                    <td><span class="badge bg-secondary">{{ resource.category }}</span></td>
+                                    <td><strong>{{ resource.booking_count }}</strong></td>
+                                    <td><span class="badge bg-success">{{ resource.completed_count }}</span></td>
+                                    <td><span class="badge bg-danger">{{ resource.cancelled_count }}</span></td>
+                                    <td>{{ resource.cancellation_rate }}%</td>
+                                    <td>{{ resource.avg_duration_hours }}h</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Analytics Dashboard: Initializing charts...');
+    console.log('Chart object:', typeof Chart);
+    
+    // Check if Chart.js loaded
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js failed to load!');
+        alert('Chart.js library failed to load. Please refresh the page.');
+        return;
+    }
+    
+    // Test canvas elements exist
+    const canvasElements = ['timelineChart', 'statusChart', 'resourcesChart', 'peakHoursChart', 'dayOfWeekChart'];
+    for (const id of canvasElements) {
+        const element = document.getElementById(id);
+        if (!element) {
+            console.error(`Canvas element not found: ${id}`);
+        } else {
+            console.log(`Found canvas: ${id}`);
+        }
+    }
+    
+    // IU Theme Colors
+    const iuCrimson = '#990000';
+    const iuCream = '#EFEAE4';
+    const colors = {
+        primary: iuCrimson,
+        success: '#2D6A4F',
+        warning: '#C17817',
+        info: '#2C4F82',
+        danger: '#E63946'
+    };
+
+    // Timeline Chart
+    try {
+        console.log('Creating timeline chart...');
+        const timelineData = {{ timeline_data | tojson }};
+        console.log('Timeline data:', timelineData);
+        
+        const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+        new Chart(timelineCtx, {
+            type: 'line',
+            data: {
+                labels: timelineData.map(d => d.date),
+                datasets: [{
+                    label: 'Daily Bookings',
+                    data: timelineData.map(d => d.count),
+                    borderColor: colors.primary,
+                    backgroundColor: colors.primary + '20',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+        console.log('Timeline chart created successfully');
+    } catch (e) {
+        console.error('Timeline chart error:', e);
+    }
+
+    // Status Chart
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ daily_metrics.bookings_by_status.keys() | list | tojson }},
+            datasets: [{
+                data: {{ daily_metrics.bookings_by_status.values() | list | tojson }},
+                backgroundColor: [colors.warning, colors.success, colors.danger, colors.info, colors.primary]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Resources Chart
+    const resourcesCtx = document.getElementById('resourcesChart').getContext('2d');
+    new Chart(resourcesCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ resource_stats[:5] | map(attribute='title') | list | tojson }},
+            datasets: [{
+                label: 'Bookings',
+                data: {{ resource_stats[:5] | map(attribute='booking_count') | list | tojson }},
+                backgroundColor: colors.primary
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    // Peak Hours Chart
+    const peakHoursCtx = document.getElementById('peakHoursChart').getContext('2d');
+    const peakHoursData = {{ peak_hours | tojson }};
+    const hoursArray = [];
+    for (let h = 0; h < 24; h++) {
+        hoursArray.push(peakHoursData[h] || 0);
+    }
+    new Chart(peakHoursCtx, {
+        type: 'bar',
+        data: {
+            labels: Array.from({length: 24}, (_, i) => i + ':00'),
+            datasets: [{
+                label: 'Bookings',
+                data: hoursArray,
+                backgroundColor: colors.info
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    // Day of Week Chart
+    const dayOfWeekCtx = document.getElementById('dayOfWeekChart').getContext('2d');
+    const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const dayData = {{ day_distribution | tojson }};
+    new Chart(dayOfWeekCtx, {
+        type: 'bar',
+        data: {
+            labels: dayOrder,
+            datasets: [{
+                label: 'Bookings',
+                data: dayOrder.map(day => dayData[day] || 0),
+                backgroundColor: colors.success
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    {% if user_activity.dept_breakdown %}
+    // Department Chart
+    const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+    new Chart(departmentCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ user_activity.dept_breakdown | map(attribute='department') | list | tojson }},
+            datasets: [{
+                label: 'Bookings',
+                data: {{ user_activity.dept_breakdown | map(attribute='count') | list | tojson }},
+                backgroundColor: colors.warning
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: { beginAtZero: true }
+            }
+        }
+    });
+    {% endif %}
+    
+    console.log('Analytics Dashboard: All charts initialized successfully!');
+});
+</script>
+{% endblock %}
+

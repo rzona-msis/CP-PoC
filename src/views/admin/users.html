@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4 mb-5">
+    <h1 class="mb-4"><i class="bi bi-people"></i> User Management</h1>
+    
+    <!-- Filter Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link {% if not current_filter %}active{% endif %}" 
+               href="{{ url_for('admin.manage_users') }}">
+                All ({{ stats.total_users }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'student' %}active{% endif %}" 
+               href="{{ url_for('admin.manage_users', role='student') }}">
+                Students ({{ stats.students }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'staff' %}active{% endif %}" 
+               href="{{ url_for('admin.manage_users', role='staff') }}">
+                Staff ({{ stats.staff }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'admin' %}active{% endif %}" 
+               href="{{ url_for('admin.manage_users', role='admin') }}">
+                Admins ({{ stats.admins }})
+            </a>
+        </li>
+    </ul>
+    
+    <!-- Users Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Department</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.user_id }}</td>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <span class="badge bg-{% if user.role == 'admin' %}danger{% elif user.role == 'staff' %}primary{% else %}secondary{% endif %}">
+                                    {{ user.role|title }}
+                                </span>
+                            </td>
+                            <td>{{ user.department or '-' }}</td>
+                            <td><small>{{ user.created_at }}</small></td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <form method="POST" action="{{ url_for('admin.update_user_role', user_id=user.user_id) }}" 
+                                          style="display: inline;">
+                                        <select name="role" class="form-select form-select-sm" 
+                                                onchange="this.form.submit()">
+                                            <option value="student" {% if user.role == 'student' %}selected{% endif %}>Student</option>
+                                            <option value="staff" {% if user.role == 'staff' %}selected{% endif %}>Staff</option>
+                                            <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                                        </select>
+                                    </form>
+                                    {% if user.user_id != current_user.user_id %}
+                                    <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.user_id) }}"
+                                          onsubmit="return confirm('Delete this user?');" style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

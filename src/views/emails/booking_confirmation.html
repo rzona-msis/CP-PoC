@@ -1,0 +1,40 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Booking Confirmation{% endblock %}
+
+{% block content %}
+<h2>Hi {{ user_name }}! 👋</h2>
+
+<p>Your booking request has been received successfully!</p>
+
+<div class="info-box">
+    <strong>📍 Resource:</strong> {{ resource_title }}<br>
+    <strong>🗓️ Date & Time:</strong> {{ start_time }} - {{ end_time }}<br>
+    <strong>📌 Location:</strong> {{ resource_location }}<br>
+    <strong>🎫 Booking ID:</strong> #{{ booking_id }}<br>
+    <strong>📊 Status:</strong> 
+    {% if status == 'approved' %}
+        <span style="color: #2D6A4F;">✅ Approved</span>
+    {% elif status == 'pending' %}
+        <span style="color: #C17817;">⏳ Pending Approval</span>
+    {% else %}
+        {{ status|title }}
+    {% endif %}
+</div>
+
+{% if status == 'pending' %}
+<p>Your booking is awaiting approval from the resource owner. You'll receive another email once it's been reviewed.</p>
+{% else %}
+<p>Your booking is confirmed! We look forward to seeing you.</p>
+{% endif %}
+
+<p style="text-align: center;">
+    <a href="http://localhost:5000/bookings/{{ booking_id }}" class="button">View Booking Details</a>
+</p>
+
+<p>If you need to make changes or have questions, please contact the resource owner through the messaging system.</p>
+
+<p>Best regards,<br>
+<strong>Campus Resource Hub Team</strong></p>
+{% endblock %}
+

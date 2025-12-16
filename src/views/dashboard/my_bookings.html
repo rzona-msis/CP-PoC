@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}My Bookings - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <h1 class="mb-4"><i class="bi bi-calendar-check"></i> My Bookings</h1>
+    
+    <!-- Filter Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link {% if not current_filter %}active{% endif %}" 
+               href="{{ url_for('dashboard.my_bookings') }}">
+                All ({{ booking_counts.all }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'pending' %}active{% endif %}" 
+               href="{{ url_for('dashboard.my_bookings', status='pending') }}">
+                Pending ({{ booking_counts.pending }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'approved' %}active{% endif %}" 
+               href="{{ url_for('dashboard.my_bookings', status='approved') }}">
+                Approved ({{ booking_counts.approved }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'completed' %}active{% endif %}" 
+               href="{{ url_for('dashboard.my_bookings', status='completed') }}">
+                Completed ({{ booking_counts.completed }})
+            </a>
+        </li>
+    </ul>
+    
+    <!-- Bookings List -->
+    {% if bookings %}
+    <div class="list-group">
+        {% for booking in bookings %}
+        <a href="{{ url_for('bookings.view_booking', booking_id=booking.booking_id) }}" 
+           class="list-group-item list-group-item-action">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-fill">
+                    <h5 class="mb-1">{{ booking.resource_title }}</h5>
+                    <p class="mb-1 text-muted">
+                        <i class="bi bi-calendar-event"></i> {{ booking.start_datetime }} to {{ booking.end_datetime }}
+                    </p>
+                    <small class="text-muted">
+                        <i class="bi bi-geo-alt"></i> {{ booking.resource_location }}
+                    </small>
+                </div>
+                <span class="badge bg-{% if booking.status == 'approved' %}success{% elif booking.status == 'pending' %}warning{% elif booking.status == 'completed' %}info{% else %}secondary{% endif %}">
+                    {{ booking.status|title }}
+                </span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center">
+        <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+        <h5>No bookings found</h5>
+        <a href="{{ url_for('resources.list_resources') }}" class="btn btn-primary">
+            Browse Resources
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

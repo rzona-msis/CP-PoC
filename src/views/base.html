@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Campus Resource Hub - Book and manage campus resources including study rooms, equipment, and event spaces.">
+    <title>{% block title %}Campus Resource Hub{% endblock %}</title>
+    
+    <!-- Google Analytics 4 -->
+    {% if ga_measurement_id %}
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_measurement_id }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ ga_measurement_id }}', {
+            'user_id': '{{ current_user.user_id if current_user.is_authenticated else "anonymous" }}',
+            'user_role': '{{ current_user.role if current_user.is_authenticated else "guest" }}'
+        });
+    </script>
+    {% endif %}
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- SharePoint Theme CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sharepoint-style.css') }}">
+    <!-- Indiana University Theme CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    {% block extra_css %}{% endblock %}
+    
+    <style>
+        /* Accessibility: Skip to content link */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--iu-crimson);
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            z-index: 100;
+            border-radius: 0 0 4px 0;
+            font-weight: bold;
+        }
+        
+        .skip-link:focus {
+            top: 0;
+        }
+        
+        /* Accessibility: Enhanced focus indicators */
+        *:focus {
+            outline: 3px solid var(--iu-crimson);
+            outline-offset: 2px;
+        }
+        
+        /* Accessibility: Focus-visible for better keyboard navigation */
+        *:focus:not(:focus-visible) {
+            outline: none;
+        }
+        
+        *:focus-visible {
+            outline: 3px solid var(--iu-crimson);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip to content link for keyboard navigation -->
+    <a href="#main-content" class="skip-link" aria-label="Skip to main content">Skip to main content</a>
+    
+    <!-- SharePoint Header -->
+    <header class="sp-header" role="banner">
+        <div class="sp-header-left">
+            <button class="sp-app-icon" aria-label="App launcher">
+                <i class="bi bi-grid-3x3-gap-fill"></i>
+            </button>
+            <span class="sp-site-title">TMHNA Financial AI</span>
+        </div>
+        
+        <div class="sp-header-center">
+            <nav class="sp-top-nav" aria-label="Main navigation">
+                <a href="{{ url_for('index') }}" class="sp-nav-link">
+                    <i class="bi bi-house"></i> Home
+                </a>
+                <a href="{{ url_for('financial.analysis_page') }}" class="sp-nav-link">
+                    <i class="bi bi-graph-up-arrow"></i> Financial Analysis
+                </a>
+                <a href="{{ url_for('master_data.matching_page') }}" class="sp-nav-link">
+                    <i class="bi bi-diagram-3"></i> Master Data Matching
+                </a>
+            </nav>
+        </div>
+        
+        <div class="sp-header-right">
+            <button class="sp-follow-btn" aria-label="Follow site">
+                <i class="bi bi-star"></i> Follow
+            </button>
+        </div>
+    </header>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="container mt-3" role="alert" aria-live="polite" aria-atomic="true">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main id="main-content" class="animate-fade-in" role="main" aria-label="Main content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top" id="scrollToTop" aria-label="Scroll to top">
+        <i class="bi bi-arrow-up"></i>
+    </button>
+
+    <!-- Footer -->
+    <footer class="mt-auto" role="contentinfo" aria-label="Site footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="bi bi-robot" aria-hidden="true"></i> TMHNA Financial AI Assistant</h5>
+                    <p class="text-muted">AI-powered financial analysis and master data quality management.</p>
+                </div>
+                <nav class="col-md-3" aria-labelledby="footer-nav-quick">
+                    <h6 id="footer-nav-quick">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('financial.analysis_page') }}" class="text-decoration-none">Financial Analysis</a></li>
+                        <li><a href="{{ url_for('master_data.matching_page') }}" class="text-decoration-none">Master Data Matching</a></li>
+                    </ul>
+                </nav>
+                <nav class="col-md-3" aria-labelledby="footer-nav-support">
+                    <h6 id="footer-nav-support">Technology</h6>
+                    <ul class="list-unstyled">
+                        <li class="text-muted">Flask + Python</li>
+                        <li class="text-muted">Bootstrap + SQLite</li>
+                        <li class="text-muted">OpenAI / Anthropic</li>
+                    </ul>
+                </nav>
+            </div>
+            <hr aria-hidden="true">
+            <div class="text-center text-muted">
+                <small>&copy; {{ current_year }} TMHNA Financial AI Assistant | MVP Proof of Concept</small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Global UI Enhancements -->
+    <script>
+        // Scroll to Top Button
+        const scrollToTopBtn = document.getElementById('scrollToTop');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                scrollToTopBtn.classList.add('visible');
+            } else {
+                scrollToTopBtn.classList.remove('visible');
+            }
+        });
+        
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // Add animation to cards when they enter viewport
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in-up');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all cards
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => observer.observe(card));
+            
+            // Add ripple effect to buttons
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.classList.add('ripple');
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            });
+        });
+        
+        // Auto-dismiss alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', () => {
+            const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

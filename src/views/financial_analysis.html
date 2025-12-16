@@ -1,0 +1,832 @@
+{% extends "base.html" %}
+{% block title %}AI Financial Analysis - TMHNA{% endblock %}
+
+{% block extra_css %}
+<style>
+.query-example {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.query-example:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+}
+.anomaly-badge {
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+.checklist-item {
+    transition: all 0.2s;
+}
+.checklist-item:hover {
+    background-color: #f8f9fa;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sp-main-container">
+    <div class="sp-page-header">
+        <h1 class="sp-page-title">
+            <i class="bi bi-graph-up-arrow"></i> AI Financial Analysis Assistant
+        </h1>
+    </div>
+    
+    <!-- Query Input Section -->
+    <div class="sp-section-card">
+        <div class="sp-card-header">
+            <h2 class="sp-card-title"><i class="bi bi-chat-dots"></i> Ask a Question About Your Financial Data</h2>
+        </div>
+        <div class="sp-card-body">
+                    <form id="analysisForm">
+                        <div class="mb-3">
+                            <label for="queryInput" class="form-label"><strong>Natural Language Query</strong></label>
+                            <textarea 
+                                class="form-control form-control-lg" 
+                                id="queryInput" 
+                                rows="3" 
+                                placeholder="Example: Explain margin erosion for Q2 by region"
+                                required
+                            ></textarea>
+                            <div class="form-text">
+                                Ask questions in plain English about revenue, margins, products, regions, and sales channels.
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg" id="analyzeBtn">
+                            <i class="bi bi-search"></i> Analyze
+                        </button>
+                    </form>
+                    
+                    <!-- Example Queries -->
+                    <div class="mt-4">
+                        <h6 class="text-muted">Example Queries (click to use):</h6>
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action query-example" data-query="Explain margin erosion for Q2 by region">
+                                <i class="bi bi-arrow-right-circle"></i> Explain margin erosion for Q2 by region
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action query-example" data-query="Show me total revenue by region for all of 2024">
+                                <i class="bi bi-arrow-right-circle"></i> Show me total revenue by region for all of 2024
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action query-example" data-query="Which products had the highest margin in July 2024?">
+                                <i class="bi bi-arrow-right-circle"></i> Which products had the highest margin in July 2024?
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action query-example" data-query="Compare online vs retail sales performance">
+                                <i class="bi bi-arrow-right-circle"></i> Compare online vs retail sales performance
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- NEW FEATURE 1: Financial Close Checklist -->
+            <div class="sp-section-card">
+                <div class="sp-card-header">
+                    <h2 class="sp-card-title"><i class="bi bi-check2-square"></i> Financial Close Checklist</h2>
+                </div>
+                <div class="sp-card-body">
+                    <p class="text-muted mb-3">Track period-end close activities and ensure all tasks are completed before reporting.</p>
+                    <div id="closeChecklist">
+                        <div class="checklist-item mb-3 p-3 border rounded" data-task="bank-rec">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="task1">
+                                    <label class="form-check-label" for="task1">
+                                        <strong>Bank Reconciliation</strong><br>
+                                        <small class="text-muted">Reconcile all bank accounts for the period</small>
+                                    </label>
+                                </div>
+                                <span class="badge bg-warning">In Progress</span>
+                            </div>
+                            <div class="mt-2">
+                                <small><i class="bi bi-person"></i> Assigned to: Finance Team</small> • 
+                                <small><i class="bi bi-calendar"></i> Due: Dec 20, 2025</small>
+                            </div>
+                        </div>
+                        
+                        <div class="checklist-item mb-3 p-3 border rounded" data-task="revenue-rec">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="task2">
+                                    <label class="form-check-label" for="task2">
+                                        <strong>Revenue Recognition Review</strong><br>
+                                        <small class="text-muted">Verify revenue is properly recognized per GAAP</small>
+                                    </label>
+                                </div>
+                                <span class="badge bg-danger">Pending</span>
+                            </div>
+                            <div class="mt-2">
+                                <small><i class="bi bi-person"></i> Assigned to: Revenue Team</small> • 
+                                <small><i class="bi bi-calendar"></i> Due: Dec 18, 2025</small>
+                            </div>
+                        </div>
+                        
+                        <div class="checklist-item mb-3 p-3 border rounded" data-task="ar-aging">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="task3" checked>
+                                    <label class="form-check-label" for="task3">
+                                        <strong>AR Aging Analysis</strong><br>
+                                        <small class="text-muted">Review accounts receivable aging report</small>
+                                    </label>
+                                </div>
+                                <span class="badge bg-success">Complete</span>
+                            </div>
+                            <div class="mt-2">
+                                <small><i class="bi bi-person"></i> Assigned to: Collections Team</small> • 
+                                <small><i class="bi bi-calendar"></i> Completed: Dec 14, 2025</small>
+                            </div>
+                        </div>
+                        
+                        <div class="checklist-item mb-3 p-3 border rounded" data-task="inventory">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="task4">
+                                    <label class="form-check-label" for="task4">
+                                        <strong>Inventory Valuation</strong><br>
+                                        <small class="text-muted">Reconcile forklift inventory across warehouses</small>
+                                    </label>
+                                </div>
+                                <span class="badge bg-warning">In Progress</span>
+                            </div>
+                            <div class="mt-2">
+                                <small><i class="bi bi-person"></i> Assigned to: Warehouse Ops</small> • 
+                                <small><i class="bi bi-calendar"></i> Due: Dec 19, 2025</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="progress" style="height: 25px;">
+                            <div id="checklistProgress" class="progress-bar bg-success" role="progressbar" style="width: 25%">25% Complete</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW FEATURE 2: Reconciliation Queue -->
+            <div class="sp-section-card">
+                <div class="sp-card-header">
+                    <h2 class="sp-card-title"><i class="bi bi-list-task"></i> Standardized Reconciliation Queue</h2>
+                </div>
+                <div class="sp-card-body">
+                    <p class="text-muted mb-3">Outstanding items requiring reconciliation across systems.</p>
+                    
+                    <!-- Filter tabs -->
+                    <ul class="nav nav-pills mb-3" id="recQueueTabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-filter="all" href="#">All <span class="badge bg-secondary ms-1">8</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-filter="high" href="#">High Priority <span class="badge bg-danger ms-1">3</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-filter="medium" href="#">Medium <span class="badge bg-warning ms-1">3</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-filter="low" href="#">Low <span class="badge bg-info ms-1">2</span></a>
+                        </li>
+                    </ul>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Description</th>
+                                    <th>System</th>
+                                    <th>Amount</th>
+                                    <th>Priority</th>
+                                    <th>Age</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recQueueBody">
+                                <tr data-priority="high">
+                                    <td><strong>REC-1047</strong></td>
+                                    <td>Unmatched invoice - Amazon Logistics forklift order</td>
+                                    <td><span class="badge bg-light text-dark">ERP → A/R</span></td>
+                                    <td class="text-danger">$45,230.00</td>
+                                    <td><span class="badge bg-danger">High</span></td>
+                                    <td>15 days</td>
+                                    <td><button class="btn btn-sm btn-primary" onclick="openRemediation('REC-1047')">Resolve</button></td>
+                                </tr>
+                                <tr data-priority="high">
+                                    <td><strong>REC-1048</strong></td>
+                                    <td>Duplicate payment detected - Hawker Battery</td>
+                                    <td><span class="badge bg-light text-dark">A/P → Bank</span></td>
+                                    <td class="text-danger">$12,500.00</td>
+                                    <td><span class="badge bg-danger">High</span></td>
+                                    <td>8 days</td>
+                                    <td><button class="btn btn-sm btn-primary" onclick="openRemediation('REC-1048')">Resolve</button></td>
+                                </tr>
+                                <tr data-priority="medium">
+                                    <td><strong>REC-1049</strong></td>
+                                    <td>Product SKU mismatch - Raymond 7400 series</td>
+                                    <td><span class="badge bg-light text-dark">Inventory → Sales</span></td>
+                                    <td class="text-warning">$8,750.50</td>
+                                    <td><span class="badge bg-warning">Medium</span></td>
+                                    <td>5 days</td>
+                                    <td><button class="btn btn-sm btn-primary" onclick="openRemediation('REC-1049')">Resolve</button></td>
+                                </tr>
+                                <tr data-priority="medium">
+                                    <td><strong>REC-1050</strong></td>
+                                    <td>Revenue timing difference - Q4 service contracts</td>
+                                    <td><span class="badge bg-light text-dark">Revenue → GL</span></td>
+                                    <td class="text-warning">$22,100.00</td>
+                                    <td><span class="badge bg-warning">Medium</span></td>
+                                    <td>3 days</td>
+                                    <td><button class="btn btn-sm btn-primary" onclick="openRemediation('REC-1050')">Resolve</button></td>
+                                </tr>
+                                <tr data-priority="high">
+                                    <td><strong>REC-1051</strong></td>
+                                    <td>Currency conversion variance - CAD transactions</td>
+                                    <td><span class="badge bg-light text-dark">FX → GL</span></td>
+                                    <td class="text-danger">$3,450.00</td>
+                                    <td><span class="badge bg-danger">High</span></td>
+                                    <td>12 days</td>
+                                    <td><button class="btn btn-sm btn-primary" onclick="openRemediation('REC-1051')">Resolve</button></td>
+                                </tr>
+                                <tr data-priority="low">
+                                    <td><strong>REC-1052</strong></td>
+                                    <td>Minor rounding difference - batch processing</td>
+                                    <td><span class="badge bg-light text-dark">AP → GL</span></td>
+                                    <td class="text-info">$12.47</td>
+                                    <td><span class="badge bg-info">Low</span></td>
+                                    <td>2 days</td>
+                                    <td><button class="btn btn-sm btn-primary" onclick="openRemediation('REC-1052')">Resolve</button></td>
+                                </tr>
+                                <tr data-priority="medium">
+                                    <td><strong>REC-1053</strong></td>
+                                    <td>Accrual reversal pending - maintenance services</td>
+                                    <td><span class="badge bg-light text-dark">Accruals → GL</span></td>
+                                    <td class="text-warning">$5,600.00</td>
+                                    <td><span class="badge bg-warning">Medium</span></td>
+                                    <td>6 days</td>
+                                    <td><button class="btn btn-sm btn-primary" onclick="openRemediation('REC-1053')">Resolve</button></td>
+                                </tr>
+                                <tr data-priority="low">
+                                    <td><strong>REC-1054</strong></td>
+                                    <td>Tax rate update required - state changes</td>
+                                    <td><span class="badge bg-light text-dark">Tax → Sales</span></td>
+                                    <td class="text-info">$385.00</td>
+                                    <td><span class="badge bg-info">Low</span></td>
+                                    <td>1 day</td>
+                                    <td><button class="btn btn-sm btn-primary" onclick="openRemediation('REC-1054')">Resolve</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="text-center py-5" style="display: none;">
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Analyzing...</span>
+                </div>
+                <p class="mt-3 h5">🤖 AI is analyzing your query...</p>
+                <p class="text-muted">This may take a few seconds</p>
+            </div>
+            
+            <!-- Results Panel -->
+            <div id="resultsPanel" style="display: none;">
+                
+                <!-- Anomalies (shown conditionally) -->
+                <div id="anomaliesCard" class="sp-section-card" style="display: none; border-left: 4px solid #FFC107;">
+                    <div class="sp-card-header" style="background-color: #FFF4CE;">
+                        <h2 class="sp-card-title"><i class="bi bi-exclamation-triangle anomaly-badge"></i> Anomalies Detected</h2>
+                    </div>
+                    <div class="sp-card-body">
+                        <ul id="anomaliesList" class="mb-0"></ul>
+                    </div>
+                </div>
+                
+                <!-- Data Visualization -->
+                <div class="sp-section-card">
+                    <div class="sp-card-header">
+                        <h2 class="sp-card-title"><i class="bi bi-bar-chart-line"></i> Data Visualization</h2>
+                    </div>
+                    <div class="sp-card-body">
+                        <canvas id="resultsChart" style="max-height: 400px;"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Data Results Table -->
+                <div class="sp-section-card">
+                    <div class="sp-card-header">
+                        <h2 class="sp-card-title"><i class="bi bi-table"></i> Query Results <span id="resultCount" class="badge bg-secondary"></span></h2>
+                    </div>
+                    <div class="sp-card-body">
+                        <div class="table-responsive">
+                            <table id="resultsTable" class="table table-striped table-hover">
+                                <thead id="resultsTableHead" class="table-dark"></thead>
+                                <tbody id="resultsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- LLM Summary (moved to bottom) -->
+                <div class="sp-section-card">
+                    <div class="sp-card-header">
+                        <h2 class="sp-card-title"><i class="bi bi-lightbulb"></i> AI Analysis Summary</h2>
+                    </div>
+                    <div class="sp-card-body">
+                        <div id="summaryText" class="lead"></div>
+                    </div>
+                </div>
+                
+                <!-- SQL Query (collapsible) -->
+                <div class="sp-section-card">
+                    <div class="sp-card-header">
+                        <h2 class="sp-card-title">
+                            <button class="btn btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#sqlCollapse">
+                                <i class="bi bi-code-slash"></i> Generated SQL Query <i class="bi bi-chevron-down"></i>
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="sqlCollapse" class="collapse">
+                        <div class="sp-card-body">
+                            <pre class="bg-dark text-light p-3 rounded"><code id="sqlQuery"></code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NEW FEATURE 3: Guided Remediation Steps Modal -->
+<div class="modal fade" id="remediationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-tools"></i> Guided Remediation: <span id="remediationId"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> <strong>AI-Suggested Resolution Path</strong>
+                </div>
+                
+                <div class="remediation-step mb-4" data-step="1">
+                    <div class="d-flex align-items-start">
+                        <div class="step-number me-3">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                1
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6><strong id="step1Title">Verify Transaction Details</strong></h6>
+                            <p id="step1Desc" class="text-muted">Review the original transaction in both systems to identify the root cause of the discrepancy.</p>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="step1Check">
+                                <label class="form-check-label" for="step1Check">Mark as complete</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="remediation-step mb-4" data-step="2">
+                    <div class="d-flex align-items-start">
+                        <div class="step-number me-3">
+                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                2
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6><strong id="step2Title">Gather Supporting Documentation</strong></h6>
+                            <p id="step2Desc" class="text-muted">Collect invoices, purchase orders, and shipping confirmations related to this transaction.</p>
+                            <div class="mb-2">
+                                <input type="file" class="form-control form-control-sm" multiple>
+                                <small class="text-muted">Upload supporting documents</small>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="step2Check">
+                                <label class="form-check-label" for="step2Check">Mark as complete</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="remediation-step mb-4" data-step="3">
+                    <div class="d-flex align-items-start">
+                        <div class="step-number me-3">
+                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                3
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6><strong id="step3Title">Create Journal Entry</strong></h6>
+                            <p id="step3Desc" class="text-muted">Post an adjusting entry to correct the discrepancy.</p>
+                            <div class="mb-2">
+                                <label class="form-label">Debit Account</label>
+                                <select class="form-select form-select-sm mb-2">
+                                    <option>1200 - Accounts Receivable</option>
+                                    <option>2000 - Accounts Payable</option>
+                                    <option>4000 - Revenue</option>
+                                </select>
+                                <label class="form-label">Credit Account</label>
+                                <select class="form-select form-select-sm mb-2">
+                                    <option>5000 - Cost of Goods Sold</option>
+                                    <option>6000 - Operating Expenses</option>
+                                    <option>1000 - Cash</option>
+                                </select>
+                                <label class="form-label">Amount</label>
+                                <input type="text" class="form-control form-control-sm" id="jeAmount" readonly>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="step3Check">
+                                <label class="form-check-label" for="step3Check">Mark as complete</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="remediation-step mb-4" data-step="4">
+                    <div class="d-flex align-items-start">
+                        <div class="step-number me-3">
+                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                4
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6><strong id="step4Title">Obtain Approval</strong></h6>
+                            <p id="step4Desc" class="text-muted">Submit for manager approval before posting.</p>
+                            <div class="mb-2">
+                                <textarea class="form-control form-control-sm" placeholder="Add notes for approver..." rows="2"></textarea>
+                            </div>
+                            <button class="btn btn-sm btn-primary">Submit for Approval</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="completeRemediation()">
+                    <i class="bi bi-check-circle"></i> Mark as Resolved
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+let currentChart = null;
+
+// Handle example query clicks
+document.querySelectorAll('.query-example').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const query = this.getAttribute('data-query');
+        document.getElementById('queryInput').value = query;
+        document.getElementById('queryInput').focus();
+    });
+});
+
+// Handle form submission
+document.getElementById('analysisForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const query = document.getElementById('queryInput').value.trim();
+    if (!query) {
+        alert('Please enter a query');
+        return;
+    }
+    
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const resultsPanel = document.getElementById('resultsPanel');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    
+    // Show loading, hide results
+    loadingSpinner.style.display = 'block';
+    resultsPanel.style.display = 'none';
+    analyzeBtn.disabled = true;
+    
+    try {
+        const response = await fetch('/api/analyze', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({query: query})
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Display summary
+            document.getElementById('summaryText').innerHTML = formatMarkdown(data.summary);
+            
+            // Display SQL
+            document.getElementById('sqlQuery').textContent = data.sql;
+            
+            // Display anomalies
+            const anomaliesCard = document.getElementById('anomaliesCard');
+            const anomaliesList = document.getElementById('anomaliesList');
+            
+            if (data.anomalies && data.anomalies.length > 0) {
+                anomaliesList.innerHTML = '';
+                data.anomalies.forEach(a => {
+                    const li = document.createElement('li');
+                    li.className = 'mb-2';
+                    li.innerHTML = `<strong>${escapeHtml(a)}</strong>`;
+                    anomaliesList.appendChild(li);
+                });
+                anomaliesCard.style.display = 'block';
+            } else {
+                anomaliesCard.style.display = 'none';
+            }
+            
+            // Display results count
+            document.getElementById('resultCount').textContent = `${data.result_count} rows`;
+            
+            // Display results table
+            displayResultsTable(data.results);
+            
+            // Display chart
+            displayChart(data.results);
+            
+            // Show results panel
+            resultsPanel.style.display = 'block';
+            
+            // Scroll to results
+            resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            alert('Error: ' + data.error);
+            console.error('Analysis error:', data);
+        }
+    } catch (error) {
+        alert('Request failed: ' + error.message);
+        console.error('Fetch error:', error);
+    } finally {
+        loadingSpinner.style.display = 'none';
+        analyzeBtn.disabled = false;
+    }
+});
+
+function displayResultsTable(results) {
+    const tableHead = document.getElementById('resultsTableHead');
+    const tableBody = document.getElementById('resultsTableBody');
+    
+    if (!results || results.length === 0) {
+        tableHead.innerHTML = '<tr><th>No Results</th></tr>';
+        tableBody.innerHTML = '<tr><td>No data returned from query</td></tr>';
+        return;
+    }
+    
+    // Create header
+    const headers = Object.keys(results[0]);
+    tableHead.innerHTML = '<tr>' + headers.map(h => 
+        `<th>${escapeHtml(h)}</th>`
+    ).join('') + '</tr>';
+    
+    // Create rows
+    tableBody.innerHTML = results.map(row => {
+        return '<tr>' + headers.map(h => {
+            let value = row[h];
+            if (value === null || value === undefined) {
+                return '<td class="text-muted">-</td>';
+            }
+            if (typeof value === 'number') {
+                return `<td class="text-end">${formatNumber(value)}</td>`;
+            }
+            return `<td>${escapeHtml(String(value))}</td>`;
+        }).join('') + '</tr>';
+    }).join('');
+}
+
+function displayChart(results) {
+    if (!results || results.length === 0) return;
+    
+    const canvas = document.getElementById('resultsChart');
+    const ctx = canvas.getContext('2d');
+    
+    // Destroy previous chart
+    if (currentChart) {
+        currentChart.destroy();
+    }
+    
+    // Try to intelligently pick chart data
+    const keys = Object.keys(results[0]);
+    const numericKeys = keys.filter(k => typeof results[0][k] === 'number');
+    const stringKeys = keys.filter(k => typeof results[0][k] === 'string');
+    
+    if (numericKeys.length === 0 || stringKeys.length === 0) {
+        canvas.style.display = 'none';
+        return;
+    }
+    
+    canvas.style.display = 'block';
+    
+    // Use first string field as labels and first numeric fields as data
+    const labelKey = stringKeys[0];
+    const dataKeys = numericKeys.slice(0, 3); // Max 3 datasets
+    
+    const labels = results.map(r => r[labelKey]);
+    const datasets = dataKeys.map((key, index) => {
+        const colors = [
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(255, 99, 132, 0.8)',
+            'rgba(75, 192, 192, 0.8)',
+        ];
+        return {
+            label: key,
+            data: results.map(r => r[key]),
+            backgroundColor: colors[index],
+            borderColor: colors[index].replace('0.8', '1'),
+            borderWidth: 2
+        };
+    });
+    
+    currentChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                title: {
+                    display: true,
+                    text: 'Query Results Visualization'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function formatNumber(num) {
+    if (Math.abs(num) >= 1000) {
+        return num.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+    return num.toFixed(2);
+}
+
+function formatMarkdown(text) {
+    // Simple markdown-like formatting
+    return text
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/\n/g, '<br>');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// NEW FEATURE 1: Checklist functionality
+document.querySelectorAll('#closeChecklist .form-check-input').forEach(checkbox => {
+    checkbox.addEventListener('change', updateChecklistProgress);
+});
+
+function updateChecklistProgress() {
+    const checkboxes = document.querySelectorAll('#closeChecklist .form-check-input');
+    const checked = document.querySelectorAll('#closeChecklist .form-check-input:checked').length;
+    const total = checkboxes.length;
+    const percentage = Math.round((checked / total) * 100);
+    
+    const progressBar = document.getElementById('checklistProgress');
+    progressBar.style.width = percentage + '%';
+    progressBar.textContent = percentage + '% Complete';
+    
+    // Update badge colors
+    checkboxes.forEach(cb => {
+        const item = cb.closest('.checklist-item');
+        const badge = item.querySelector('.badge');
+        if (cb.checked) {
+            badge.className = 'badge bg-success';
+            badge.textContent = 'Complete';
+        }
+    });
+}
+
+// NEW FEATURE 2: Reconciliation Queue filtering
+document.querySelectorAll('#recQueueTabs .nav-link').forEach(tab => {
+    tab.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Update active tab
+        document.querySelectorAll('#recQueueTabs .nav-link').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        const filter = this.getAttribute('data-filter');
+        const rows = document.querySelectorAll('#recQueueBody tr');
+        
+        rows.forEach(row => {
+            if (filter === 'all') {
+                row.style.display = '';
+            } else {
+                const priority = row.getAttribute('data-priority');
+                row.style.display = (priority === filter) ? '' : 'none';
+            }
+        });
+    });
+});
+
+// NEW FEATURE 3: Remediation modal
+function openRemediation(recId) {
+    const remediationData = {
+        'REC-1047': {
+            title: 'Unmatched invoice - Amazon Logistics forklift order',
+            amount: '$45,230.00',
+            steps: {
+                1: {
+                    title: 'Verify Transaction Details',
+                    desc: 'Check if the invoice was entered in both ERP and A/R systems. Look for PO #AMZ-2024-1156.'
+                },
+                2: {
+                    title: 'Contact Customer',
+                    desc: 'Reach out to Amazon Logistics accounts payable to verify receipt of goods and invoice.'
+                },
+                3: {
+                    title: 'Create Journal Entry',
+                    desc: 'Post adjusting entry to match invoice in both systems. Debit: A/R, Credit: Revenue.'
+                },
+                4: {
+                    title: 'Obtain Approval',
+                    desc: 'Submit to Revenue Manager for approval due to amount > $10,000.'
+                }
+            }
+        },
+        'REC-1048': {
+            title: 'Duplicate payment detected - Hawker Battery',
+            amount: '$12,500.00',
+            steps: {
+                1: {
+                    title: 'Identify Duplicate Payments',
+                    desc: 'Review bank statements to confirm duplicate ACH payment on Invoice #HB-5522.'
+                },
+                2: {
+                    title: 'Contact Vendor',
+                    desc: 'Email Hawker Battery A/P department to request refund of duplicate payment.'
+                },
+                3: {
+                    title: 'Create Receivable Entry',
+                    desc: 'Book A/R from vendor for duplicate amount until refund is received.'
+                },
+                4: {
+                    title: 'Monitor Refund',
+                    desc: 'Track refund status and clear A/R upon receipt within 30 days.'
+                }
+            }
+        }
+    };
+    
+    const data = remediationData[recId] || {
+        title: 'Reconciliation Item',
+        amount: '$0.00',
+        steps: {
+            1: {title: 'Verify Details', desc: 'Review the transaction.'},
+            2: {title: 'Gather Documentation', desc: 'Collect supporting documents.'},
+            3: {title: 'Create Entry', desc: 'Post correcting entry.'},
+            4: {title: 'Obtain Approval', desc: 'Submit for approval.'}
+        }
+    };
+    
+    document.getElementById('remediationId').textContent = recId;
+    document.getElementById('jeAmount').value = data.amount;
+    
+    // Update step content
+    Object.keys(data.steps).forEach(stepNum => {
+        const step = data.steps[stepNum];
+        document.getElementById(`step${stepNum}Title`).textContent = step.title;
+        document.getElementById(`step${stepNum}Desc`).textContent = step.desc;
+    });
+    
+    // Reset checkboxes
+    document.querySelectorAll('.remediation-step .form-check-input').forEach(cb => cb.checked = false);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('remediationModal'));
+    modal.show();
+}
+
+function completeRemediation() {
+    const allChecked = Array.from(document.querySelectorAll('.remediation-step .form-check-input'))
+        .every(cb => cb.checked);
+    
+    if (!allChecked) {
+        alert('Please complete all remediation steps before marking as resolved.');
+        return;
+    }
+    
+    alert('Remediation completed successfully! The item has been removed from the queue.');
+    bootstrap.Modal.getInstance(document.getElementById('remediationModal')).hide();
+}
+</script>
+{% endblock %}

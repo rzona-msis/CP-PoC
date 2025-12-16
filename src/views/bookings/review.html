@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Write Review - {{ booking.resource_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <h1 class="mb-4"><i class="bi bi-star"></i> Write a Review</h1>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5>{{ booking.resource_title }}</h5>
+                    <p class="text-muted mb-0">
+                        Booking: {{ booking.start_datetime }} to {{ booking.end_datetime }}
+                    </p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body p-4">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+                        {{ form.resource_id }}
+                        {{ form.booking_id }}
+                        
+                        <div class="mb-3">
+                            {{ form.rating.label(class="form-label") }}
+                            {{ form.rating(class="form-select" + (" is-invalid" if form.rating.errors else "")) }}
+                            {% if form.rating.errors %}
+                                <div class="invalid-feedback">{{ form.rating.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.comment.label(class="form-label") }}
+                            {{ form.comment(class="form-control", rows="5", 
+                                          placeholder="Share your experience with this resource...") }}
+                            <small class="form-text text-muted">Optional but helpful for others</small>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Submit Review
+                            </button>
+                            <a href="{{ url_for('bookings.view_booking', booking_id=booking.booking_id) }}" 
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,196 @@
+/* Custom CSS for Campus Resource Hub */
+
+/* WCAG 2.1 AA Compliance Styles */
+
+/* Skip Link */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: #000;
+    color: #fff;
+    padding: 8px;
+    text-decoration: none;
+    z-index: 100;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* Focus Indicators - Enhanced visibility */
+*:focus {
+    outline: 3px solid #0d6efd;
+    outline-offset: 2px;
+}
+
+button:focus,
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 3px solid #0d6efd;
+    outline-offset: 2px;
+}
+
+/* Minimum contrast ratios for text */
+body {
+    color: #212529; /* 4.5:1 contrast on white background */
+}
+
+.text-muted {
+    color: #6c757d !important; /* 4.5:1 contrast on white background */
+}
+
+/* Link contrast */
+a {
+    color: #0056b3; /* Enhanced contrast */
+}
+
+a:hover {
+    color: #003d82;
+}
+
+/* Card styling */
+.card {
+    border: 1px solid #dee2e6;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Touch targets - Minimum 44x44px for WCAG */
+.btn,
+.form-control,
+.form-select {
+    min-height: 44px;
+}
+
+/* Badge styling */
+.badge {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* Accessible form validation */
+.is-invalid {
+    border-color: #dc3545;
+}
+
+.invalid-feedback {
+    display: block;
+    color: #dc3545;
+    font-size: 0.875rem;
+}
+
+/* Loading states - ARIA live regions */
+[aria-live] {
+    position: relative;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .card {
+        border-width: 2px;
+    }
+    
+    .btn {
+        border-width: 2px;
+    }
+}
+
+/* Resource grid responsive layout */
+.row-cols-1 > * {
+    margin-bottom: 1rem;
+}
+
+/* Message thread styling */
+.message-thread {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.message-bubble {
+    padding: 12px 16px;
+    border-radius: 16px;
+    margin-bottom: 8px;
+    max-width: 70%;
+}
+
+.message-sent {
+    background-color: #0d6efd;
+    color: white;
+    margin-left: auto;
+}
+
+.message-received {
+    background-color: #e9ecef;
+    color: #212529;
+}
+
+/* Booking calendar styles */
+.booking-calendar {
+    border: 1px solid #dee2e6;
+    padding: 16px;
+    border-radius: 8px;
+}
+
+/* Star rating */
+.star-rating {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.star {
+    font-size: 1.5rem;
+    color: #ffc107;
+}
+
+.star-empty {
+    color: #dee2e6;
+}
+
+/* Admin dashboard stats */
+.stat-card {
+    text-align: center;
+    padding: 24px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+/* Footer styling */
+footer {
+    border-top: 1px solid #dee2e6;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    
+    .card-body {
+        padding: 16px;
+    }
+}

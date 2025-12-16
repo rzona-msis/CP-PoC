@@ -1,0 +1,49 @@
+# Git files
+.git
+.gitignore
+.github
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Testing
+.pytest_cache/
+tests/
+*.test
+*.spec
+
+# Documentation
+*.md
+docs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+docker-compose*.yml
+Dockerfile.dev
+
+# Local development
+.env
+*.db
+*.log
+logs/
+
+# AWS
+.elasticbeanstalk/
+aws-*.zip
+
+# Other
+.DS_Store
+*.zip
+*.tar.gz

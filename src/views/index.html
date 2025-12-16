@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Campus Resource Hub{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container text-center">
+        <div class="hero-badge mb-3">
+            <span class="badge bg-light text-crimson px-4 py-2">
+                <i class="bi bi-star-fill"></i> Trusted by Leading Universities
+            </span>
+        </div>
+        <h1 class="display-3 fw-bold mb-4 hero-title">Transform Campus Resource Management</h1>
+        <p class="lead mb-4 mx-auto hero-subtitle" style="max-width: 700px;">
+            Streamline operations, maximize utilization, and empower your campus community with an intelligent resource booking platform designed for higher education.
+        </p>
+        
+        <!-- Key Metrics -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-3 col-6">
+                <div class="hero-stat">
+                    <h3 class="display-6 fw-bold text-white mb-0">98%</h3>
+                    <p class="mb-0 text-white-50">Satisfaction Rate</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="hero-stat">
+                    <h3 class="display-6 fw-bold text-white mb-0">45%</h3>
+                    <p class="mb-0 text-white-50">Higher Utilization</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="hero-stat">
+                    <h3 class="display-6 fw-bold text-white mb-0">24/7</h3>
+                    <p class="mb-0 text-white-50">Self-Service Access</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="hero-stat">
+                    <h3 class="display-6 fw-bold text-white mb-0">$50K+</h3>
+                    <p class="mb-0 text-white-50">Annual Savings</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <form action="{{ url_for('resources.list_resources') }}" method="GET" class="d-flex gap-2 search-form-premium">
+                    <input type="text" name="keyword" class="form-control form-control-lg shadow-lg" 
+                           placeholder="Search study rooms, equipment, labs, and more...">
+                    <button type="submit" class="btn btn-light btn-lg px-5 shadow-lg">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        {% if not current_user.is_authenticated %}
+        <div class="mt-4">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg me-2 px-5 shadow-lg">
+                <i class="bi bi-rocket-takeoff"></i> Start Free Trial
+            </a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-5 shadow-lg">
+                <i class="bi bi-box-arrow-in-right"></i> Sign In
+            </a>
+        </div>
+        <p class="text-white-50 mt-3 small">
+            <i class="bi bi-shield-check"></i> No credit card required • Setup in minutes • Enterprise-ready
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Categories Section -->
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Browse by Category</h2>
+    <div class="row g-3">
+        {% for category in categories %}
+        <div class="col-md-3 col-sm-6">
+            <a href="{{ url_for('resources.list_resources', category=category) }}" 
+               class="text-decoration-none">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-bookmark-fill fs-1 text-primary"></i>
+                        <h5 class="card-title mt-2">{{ category }}</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Recent Resources -->
+<div class="container mt-5">
+    <h2 class="mb-4">Recently Added</h2>
+    <div class="row g-4">
+        {% for resource in recent_resources %}
+        <div class="col-md-4">
+            <div class="card h-100">
+                {% if resource.image_url %}
+                <img src="{{ resource.image_url }}" 
+                     class="card-img-top" 
+                     alt="{{ resource.title }}"
+                     style="height: 200px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <span class="badge bg-primary mb-2">{{ resource.category or 'Other' }}</span>
+                    <h5 class="card-title">{{ resource.title }}</h5>
+                    <p class="card-text text-muted">
+                        {{ (resource.description[:100] + '...') if resource.description and resource.description|length > 100 else resource.description }}
+                    </p>
+                    <p class="mb-1">
+                        <i class="bi bi-geo-alt"></i> {{ resource.location or 'Location TBD' }}
+                    </p>
+                    {% if resource.avg_rating and resource.avg_rating > 0 %}
+                    <p class="mb-0">
+                        <span class="rating-stars">
+                            {% for i in range(resource.avg_rating|int) %}★{% endfor %}
+                        </span>
+                        <small class="text-muted">({{ resource.review_count }} reviews)</small>
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="{{ url_for('resources.view_resource', resource_id=resource.resource_id) }}" 
+                       class="btn btn-outline-primary btn-sm w-100">
+                        View Details <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="text-center mt-4">
+        <a href="{{ url_for('resources.list_resources') }}" class="btn btn-primary">
+            View All Resources <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+<!-- Top Rated Resources -->
+{% if top_rated_resources %}
+<div class="container mt-5">
+    <h2 class="mb-4">Top Rated Resources</h2>
+    <div class="row g-4">
+        {% for resource in top_rated_resources %}
+        <div class="col-md-4">
+            <div class="card h-100 border-success">
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-star-fill"></i> Top Rated
+                </div>
+                {% if resource.image_url %}
+                <img src="{{ resource.image_url }}" 
+                     class="card-img-top" 
+                     alt="{{ resource.title }}"
+                     style="height: 200px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ resource.title }}</h5>
+                    <p class="card-text text-muted">
+                        {{ (resource.description[:80] + '...') if resource.description and resource.description|length > 80 else resource.description }}
+                    </p>
+                    <p class="mb-0">
+                        <span class="rating-stars fs-5">
+                            {% for i in range(resource.avg_rating|round|int) %}★{% endfor %}
+                        </span>
+                        <strong>{{ "%.1f"|format(resource.avg_rating) }}</strong>
+                        <small class="text-muted">({{ resource.review_count }} reviews)</small>
+                    </p>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="{{ url_for('resources.view_resource', resource_id=resource.resource_id) }}" 
+                       class="btn btn-outline-success btn-sm w-100">
+                        View Resource
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Value Proposition Section -->
+<div class="container mt-5 mb-5">
+    <div class="text-center mb-5">
+        <span class="badge bg-crimson text-white px-3 py-2 mb-3">
+            <i class="bi bi-lightning-charge-fill"></i> ENTERPRISE FEATURES
+        </span>
+        <h2 class="display-5 fw-bold mb-3">Everything Your Campus Needs</h2>
+        <p class="lead text-muted mx-auto" style="max-width: 700px;">
+            Built for the modern university. Scalable, secure, and designed to drive efficiency across your entire institution.
+        </p>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="feature-card-premium text-center p-4">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-graph-up-arrow fs-1 text-primary"></i>
+                </div>
+                <h4 class="fw-bold">Increase Utilization by 45%</h4>
+                <p class="text-muted">AI-powered scheduling ensures optimal resource usage and eliminates booking conflicts automatically.</p>
+                <ul class="list-unstyled text-start small text-muted">
+                    <li><i class="bi bi-check-circle-fill text-success"></i> Smart conflict detection</li>
+                    <li><i class="bi bi-check-circle-fill text-success"></i> Automated reminders</li>
+                    <li><i class="bi bi-check-circle-fill text-success"></i> Usage analytics</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card-premium text-center p-4">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-clock-history fs-1 text-success"></i>
+                </div>
+                <h4 class="fw-bold">Save 15+ Hours/Week</h4>
+                <p class="text-muted">Eliminate manual scheduling, phone calls, and email chains. Students and staff book instantly.</p>
+                <ul class="list-unstyled text-start small text-muted">
+                    <li><i class="bi bi-check-circle-fill text-success"></i> 24/7 self-service portal</li>
+                    <li><i class="bi bi-check-circle-fill text-success"></i> Instant approvals</li>
+                    <li><i class="bi bi-check-circle-fill text-success"></i> Calendar integration</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card-premium text-center p-4">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-shield-check fs-1 text-warning"></i>
+                </div>
+                <h4 class="fw-bold">Enterprise-Grade Security</h4>
+                <p class="text-muted">SOC 2 compliant platform with role-based access control and comprehensive audit trails.</p>
+                <ul class="list-unstyled text-start small text-muted">
+                    <li><i class="bi bi-check-circle-fill text-success"></i> SSO/SAML integration</li>
+                    <li><i class="bi bi-check-circle-fill text-success"></i> GDPR & FERPA compliant</li>
+                    <li><i class="bi bi-check-circle-fill text-success"></i> 99.9% uptime SLA</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ROI Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg bg-gradient-premium">
+                <div class="card-body p-5 text-center">
+                    <h3 class="fw-bold text-white mb-3">
+                        <i class="bi bi-trophy-fill"></i> Proven ROI in First Semester
+                    </h3>
+                    <p class="text-white-50 mb-4 mx-auto" style="max-width: 600px;">
+                        Join 100+ universities that have transformed their resource management and achieved measurable results.
+                    </p>
+                    <div class="row justify-content-center">
+                        <div class="col-md-3 mb-3">
+                            <h4 class="text-white fw-bold">$50,000</h4>
+                            <small class="text-white-50">Average Annual Savings</small>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <h4 class="text-white fw-bold">85%</h4>
+                            <small class="text-white-50">Reduction in No-Shows</small>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <h4 class="text-white fw-bold">4.8/5</h4>
+                            <small class="text-white-50">Average User Rating</small>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <h4 class="text-white fw-bold">< 1 Day</h4>
+                            <small class="text-white-50">Average Setup Time</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

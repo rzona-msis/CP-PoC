@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Campus Resource Hub{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4 mb-5">
+    <h1 class="mb-4"><i class="bi bi-shield-check"></i> Admin Dashboard</h1>
+    
+    <!-- System Statistics -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-people fs-1 text-primary"></i>
+                    <h3 class="mt-2">{{ stats.users.total_users }}</h3>
+                    <p class="text-muted mb-0">Total Users</p>
+                    <small class="text-muted">
+                        {{ stats.users.students }} students, {{ stats.users.staff }} staff
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-box fs-1 text-success"></i>
+                    <h3 class="mt-2">{{ stats.resources.total_resources }}</h3>
+                    <p class="text-muted mb-0">Resources</p>
+                    <small class="text-muted">{{ stats.resources.published }} published</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-calendar-check fs-1 text-warning"></i>
+                    <h3 class="mt-2">{{ stats.bookings.total_bookings }}</h3>
+                    <p class="text-muted mb-0">Bookings</p>
+                    <small class="text-muted">{{ stats.bookings.pending }} pending</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-star fs-1 text-info"></i>
+                    <h3 class="mt-2">{{ stats.reviews.total_reviews }}</h3>
+                    <p class="text-muted mb-0">Reviews</p>
+                    <small class="text-muted">Avg: {{ stats.reviews.average_rating or 0 }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Links -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <a href="{{ url_for('admin.manage_users') }}" class="text-decoration-none">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people-fill fs-3 text-primary"></i>
+                        <h5 class="mt-2">Manage Users</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('admin.manage_resources') }}" class="text-decoration-none">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-box-seam fs-3 text-success"></i>
+                        <h5 class="mt-2">Manage Resources</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('admin.manage_bookings') }}" class="text-decoration-none">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-calendar3 fs-3 text-warning"></i>
+                        <h5 class="mt-2">Manage Bookings</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('admin.manage_reviews') }}" class="text-decoration-none">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-chat-square-text fs-3 text-info"></i>
+                        <h5 class="mt-2">Moderate Reviews</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Admin Actions</h5>
+                    <a href="{{ url_for('admin.view_logs') }}" class="btn btn-sm btn-outline-primary">View All Logs</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_logs %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Admin</th>
+                                    <th>Action</th>
+                                    <th>Target</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in recent_logs[:10] %}
+                                <tr>
+                                    <td><small>{{ log.timestamp }}</small></td>
+                                    <td>{{ log.admin_name }}</td>
+                                    <td>{{ log.action }}</td>
+                                    <td>
+                                        {% if log.target_table %}
+                                        <small class="text-muted">{{ log.target_table }} #{{ log.target_id }}</small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">No recent activity</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

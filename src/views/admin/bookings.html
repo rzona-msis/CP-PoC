@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Bookings - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4 mb-5">
+    <h1 class="mb-4"><i class="bi bi-calendar3"></i> Booking Management</h1>
+    
+    <!-- Statistics Cards -->
+    {% if stats %}
+    <div class="row g-3 mb-4">
+        <div class="col-md-2">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="mb-0">{{ stats.total_bookings or 0 }}</h3>
+                    <small class="text-muted">Total</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center border-warning">
+                <div class="card-body">
+                    <h3 class="mb-0 text-warning">{{ stats.pending or 0 }}</h3>
+                    <small class="text-muted">Pending</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center border-success">
+                <div class="card-body">
+                    <h3 class="mb-0 text-success">{{ stats.approved or 0 }}</h3>
+                    <small class="text-muted">Approved</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center border-info">
+                <div class="card-body">
+                    <h3 class="mb-0 text-info">{{ stats.completed or 0 }}</h3>
+                    <small class="text-muted">Completed</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center border-danger">
+                <div class="card-body">
+                    <h3 class="mb-0 text-danger">{{ stats.rejected or 0 }}</h3>
+                    <small class="text-muted">Rejected</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center border-secondary">
+                <div class="card-body">
+                    <h3 class="mb-0 text-secondary">{{ stats.cancelled or 0 }}</h3>
+                    <small class="text-muted">Cancelled</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Filter Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link {% if not current_filter %}active{% endif %}" 
+               href="{{ url_for('admin.manage_bookings') }}">
+                All Bookings
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'pending' %}active{% endif %}" 
+               href="{{ url_for('admin.manage_bookings', status='pending') }}">
+                Pending
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'approved' %}active{% endif %}" 
+               href="{{ url_for('admin.manage_bookings', status='approved') }}">
+                Approved
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'completed' %}active{% endif %}" 
+               href="{{ url_for('admin.manage_bookings', status='completed') }}">
+                Completed
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'rejected' %}active{% endif %}" 
+               href="{{ url_for('admin.manage_bookings', status='rejected') }}">
+                Rejected
+            </a>
+        </li>
+    </ul>
+    
+    <!-- Bookings Table -->
+    <div class="card">
+        <div class="card-body">
+            {% if bookings %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Resource</th>
+                            <th>Requester</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td>{{ booking.booking_id }}</td>
+                            <td>
+                                <strong>{{ booking.resource_title }}</strong>
+                            </td>
+                            <td>{{ booking.requester_name }}</td>
+                            <td>
+                                <small>{{ booking.start_datetime }}</small>
+                            </td>
+                            <td>
+                                <small>{{ booking.end_datetime }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-{% if booking.status == 'approved' %}success{% elif booking.status == 'pending' %}warning{% elif booking.status == 'rejected' %}danger{% elif booking.status == 'completed' %}info{% else %}secondary{% endif %}">
+                                    {{ booking.status|title }}
+                                </span>
+                            </td>
+                            <td><small>{{ booking.created_at }}</small></td>
+                            <td>
+                                <a href="{{ url_for('bookings.view_booking', booking_id=booking.booking_id) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-calendar-x fs-1 text-muted d-block mb-3"></i>
+                <p class="text-muted">No bookings found{% if current_filter %} with status "{{ current_filter }}"{% endif %}.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

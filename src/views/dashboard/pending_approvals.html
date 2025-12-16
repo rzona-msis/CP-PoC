@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Pending Approvals - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <h1 class="mb-4"><i class="bi bi-clock-history"></i> Pending Approvals</h1>
+    
+    {% if approvals %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i>
+        <strong>{{ approvals|length }} booking(s) awaiting your approval</strong>
+    </div>
+    
+    <div class="list-group">
+        {% for booking in approvals %}
+        <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-fill">
+                    <h5 class="mb-1">{{ booking.resource_title }}</h5>
+                    <p class="mb-1">
+                        <strong>Requester:</strong> {{ booking.requester_name }} ({{ booking.requester_email }})<br>
+                        <strong>Time:</strong> {{ booking.start_datetime }} to {{ booking.end_datetime }}<br>
+                        {% if booking.notes %}
+                        <strong>Notes:</strong> {{ booking.notes }}<br>
+                        {% endif %}
+                        <small class="text-muted">Requested: {{ booking.created_at }}</small>
+                    </p>
+                </div>
+                <div class="btn-group">
+                    <form method="POST" action="{{ url_for('bookings.approve_booking', booking_id=booking.booking_id) }}"
+                          style="display: inline;">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> Approve
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ url_for('bookings.reject_booking', booking_id=booking.booking_id) }}"
+                          onsubmit="return confirm('Reject this booking?');" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-x-circle"></i> Reject
+                        </button>
+                    </form>
+                    <a href="{{ url_for('bookings.view_booking', booking_id=booking.booking_id) }}" 
+                       class="btn btn-outline-secondary">
+                        <i class="bi bi-eye"></i> Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-success text-center">
+        <i class="bi bi-check-circle fs-1 d-block mb-2"></i>
+        <h5>All caught up!</h5>
+        <p>No pending approvals at this time.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

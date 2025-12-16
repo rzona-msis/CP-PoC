@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Conversation with {{ other_user.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5 animate-fade-in-up">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="academic-header mb-0">
+                    <i class="bi bi-chat-dots-fill text-crimson"></i> 
+                    Conversation with {{ other_user.name }}
+                </h1>
+                <a href="{{ url_for('messages.list_threads') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+            </div>
+            
+            <!-- Messages -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4" style="max-height: 500px; overflow-y: auto; background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);">
+                    {% for message in messages %}
+                    <div class="mb-3 {% if message.sender_id == current_user.user_id %}text-end{% endif %} animate-fade-in">
+                        <div class="d-inline-block text-start" style="max-width: 70%;">
+                            <div class="message-bubble {% if message.sender_id == current_user.user_id %}sent{% else %}received{% endif %}">
+                                <small class="d-block mb-1 fw-bold">
+                                    <i class="bi bi-person-circle"></i> {{ message.sender_name }}
+                                </small>
+                                <p class="mb-2" style="white-space: pre-wrap;">{{ message.content }}</p>
+                                <small class="text-muted" style="font-size: 0.7rem;">
+                                    <i class="bi bi-clock"></i> {{ message.timestamp }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Reply Form -->
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-gradient-primary text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-reply-fill"></i> Reply
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('messages.send_message') }}">
+                        {{ form.hidden_tag() }}
+                        {{ form.receiver_id }}
+                        <div class="mb-3">
+                            {{ form.content(
+                                class="form-control form-control-lg", 
+                                rows="4", 
+                                placeholder="Type your reply...",
+                                aria_label="Reply message"
+                            ) }}
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-send-fill"></i> Send Reply
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Message Bubble Styles */
+.message-bubble {
+    padding: 12px 16px;
+    border-radius: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.message-bubble.sent {
+    background: linear-gradient(135deg, var(--iu-crimson) 0%, #900 100%);
+    color: white;
+}
+
+.message-bubble.sent .text-muted {
+    color: rgba(255,255,255,0.8) !important;
+}
+
+.message-bubble.received {
+    background: #f8f9fa;
+    color: #333;
+    border: 1px solid #e9ecef;
+}
+
+.message-bubble:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+</style>
+{% endblock %}
+

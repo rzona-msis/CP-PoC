@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: campus-resource-hub-dev
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - SECRET_KEY=dev-secret-key
+      - MAIL_SUPPRESS_SEND=true
+    volumes:
+      # Mount source code for hot reload
+      - ./src:/app/src
+      - ./run.py:/app/run.py
+      - ./src/campus_hub.db:/app/src/campus_hub.db
+    restart: unless-stopped
+    networks:
+      - campus-hub-dev-network
+
+networks:
+  campus-hub-dev-network:
+    driver: bridge
+

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}My Bookings - Campus Resource Hub{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">My Bookings</h1>
+
+{% if bookings %}
+<div class="table-responsive">
+    <table class="table table-hover" aria-label="My bookings list">
+        <thead>
+            <tr>
+                <th scope="col">Resource</th>
+                <th scope="col">Start Time</th>
+                <th scope="col">End Time</th>
+                <th scope="col">Status</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('resources.detail', resource_id=booking.resource_id) }}">
+                        {{ booking.resource.title }}
+                    </a>
+                </td>
+                <td>{{ booking.start_datetime.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ booking.end_datetime.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    <span class="badge 
+                        {% if booking.status == 'approved' %}bg-success
+                        {% elif booking.status == 'pending' %}bg-warning text-dark
+                        {% elif booking.status == 'rejected' %}bg-danger
+                        {% else %}bg-secondary{% endif %}"
+                        aria-label="Booking status: {{ booking.status }}">
+                        {{ booking.status|title }}
+                    </span>
+                </td>
+                <td>
+                    {% if booking.status in ['pending', 'approved'] %}
+                    <form method="POST" action="{{ url_for('bookings.cancel_booking', booking_id=booking.booking_id) }}" 
+                          style="display: inline;"
+                          onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                aria-label="Cancel booking for {{ booking.resource.title }}">
+                            Cancel
+                        </button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info" role="status">
+    <p class="mb-0">You don't have any bookings yet. <a href="{{ url_for('resources.list_resources') }}">Browse resources</a> to make a booking.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}My Resources - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-box"></i> My Resources</h1>
+        <a href="{{ url_for('resources.create_resource') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Create New Resource
+        </a>
+    </div>
+    
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3>{{ stats.total_resources }}</h3>
+                    <p class="text-muted mb-0">Total</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3>{{ stats.published }}</h3>
+                    <p class="text-muted mb-0">Published</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3>{{ stats.draft }}</h3>
+                    <p class="text-muted mb-0">Draft</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Resources List -->
+    {% if resources %}
+    <div class="row g-4">
+        {% for resource in resources %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="badge bg-{{ 'success' if resource.status == 'published' else 'secondary' }}">
+                            {{ resource.status|title }}
+                        </span>
+                        <span class="badge bg-primary">{{ resource.category }}</span>
+                    </div>
+                    <h5>{{ resource.title }}</h5>
+                    <p class="text-muted small">{{ (resource.description[:100] + '...') if resource.description and resource.description|length > 100 else resource.description }}</p>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('resources.view_resource', resource_id=resource.resource_id) }}" 
+                           class="btn btn-sm btn-outline-primary flex-fill">View</a>
+                        <a href="{{ url_for('resources.edit_resource', resource_id=resource.resource_id) }}" 
+                           class="btn btn-sm btn-outline-secondary flex-fill">Edit</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center">
+        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+        <h5>No resources yet</h5>
+        <p>Create your first resource to get started</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

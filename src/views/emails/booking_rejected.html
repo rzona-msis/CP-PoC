@@ -1,0 +1,37 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Booking Request Update{% endblock %}
+
+{% block content %}
+<h2>Hi {{ user_name }},</h2>
+
+<p>We wanted to update you on your recent booking request.</p>
+
+<div class="info-box">
+    <strong>📍 Resource:</strong> {{ resource_title }}<br>
+    <strong>🗓️ Requested Time:</strong> {{ start_time }} - {{ end_time }}<br>
+    <strong>🎫 Booking ID:</strong> #{{ booking_id }}<br>
+    <strong>📊 Status:</strong> <span style="color: #990000;">❌ Not Approved</span>
+</div>
+
+{% if reason %}
+<p><strong>Reason:</strong> {{ reason }}</p>
+{% endif %}
+
+<p>Unfortunately, this booking request could not be approved at this time. This may be due to scheduling conflicts, resource availability, or other requirements.</p>
+
+<p style="text-align: center;">
+    <a href="http://localhost:5000/resources" class="button">Browse Other Resources</a>
+</p>
+
+<p>Feel free to:</p>
+<ul>
+    <li>Try booking a different time slot</li>
+    <li>Contact the resource owner for more information</li>
+    <li>Explore similar resources</li>
+</ul>
+
+<p>Best regards,<br>
+<strong>Campus Resource Hub Team</strong></p>
+{% endblock %}
+

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Form Test</title>
+</head>
+<body>
+    <h1>Simple Form Test</h1>
+    <form method="POST" action="/messages/send">
+        <input type="hidden" name="csrf_token" value="test">
+        <label>Recipient ID: <input type="text" name="receiver_id" value="1"></label><br>
+        <label>Message: <input type="text" name="content" value="Test message"></label><br>
+        <button type="submit">Send</button>
+    </form>
+    
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            console.log('FORM SUBMITTING!');
+            alert('Form is trying to submit!');
+        });
+    </script>
+</body>
+</html>
+

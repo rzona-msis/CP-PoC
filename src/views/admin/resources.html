@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Resources - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4 mb-5">
+    <h1 class="mb-4"><i class="bi bi-box-seam"></i> Resource Management</h1>
+    
+    <!-- Filter Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'published' %}active{% endif %}" 
+               href="{{ url_for('admin.manage_resources', status='published') }}">
+                Published ({{ stats.published }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'draft' %}active{% endif %}" 
+               href="{{ url_for('admin.manage_resources', status='draft') }}">
+                Draft ({{ stats.draft }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'archived' %}active{% endif %}" 
+               href="{{ url_for('admin.manage_resources', status='archived') }}">
+                Archived ({{ stats.archived }})
+            </a>
+        </li>
+    </ul>
+    
+    <!-- Resources Grid -->
+    <div class="row g-4">
+        {% for resource in resources %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="badge bg-primary">{{ resource.category }}</span>
+                        <span class="badge bg-{{ 'success' if resource.status == 'published' else 'secondary' }}">
+                            {{ resource.status|title }}
+                        </span>
+                    </div>
+                    <h5>{{ resource.title }}</h5>
+                    <p class="text-muted small">{{ (resource.description[:100] + '...') if resource.description else 'No description' }}</p>
+                    <small class="text-muted">
+                        <i class="bi bi-person"></i> {{ resource.owner_name }}<br>
+                        <i class="bi bi-geo-alt"></i> {{ resource.location or 'TBD' }}
+                    </small>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('resources.view_resource', resource_id=resource.resource_id) }}" 
+                           class="btn btn-sm btn-outline-primary flex-fill">View</a>
+                        <a href="{{ url_for('resources.edit_resource', resource_id=resource.resource_id) }}" 
+                           class="btn btn-sm btn-outline-secondary flex-fill">Edit</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+

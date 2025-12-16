@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}My Waitlists{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="mb-4"><i class="bi bi-hourglass-split"></i> My Waitlists</h1>
+            
+            {% if waitlists %}
+            <p class="text-muted mb-4">You'll be notified by email when a spot opens up for these resources.</p>
+            
+            <div class="row">
+                {% for waitlist in waitlists %}
+                <div class="col-md-6 mb-4 animate-fade-in-up">
+                    <div class="card shadow-hover">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-2">
+                                        <a href="{{ url_for('resources.view_resource', resource_id=waitlist.resource_id) }}" 
+                                           class="text-decoration-none">
+                                            {{ waitlist.title }}
+                                        </a>
+                                    </h5>
+                                    <p class="text-muted mb-1">
+                                        <i class="bi bi-geo-alt"></i> {{ waitlist.location or 'TBD' }}
+                                    </p>
+                                    <p class="text-muted mb-0">
+                                        <i class="bi bi-tag"></i> {{ waitlist.category }}
+                                    </p>
+                                </div>
+                                <span class="badge bg-warning" style="font-size: 1rem;">
+                                    #{{ waitlist.position }}
+                                </span>
+                            </div>
+                            
+                            <div class="alert alert-info mb-3">
+                                <strong><i class="bi bi-clock"></i> Requested Time:</strong><br>
+                                {{ waitlist.requested_datetime|datetime_format }}
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar-plus"></i> 
+                                    Joined {{ waitlist.created_at|datetime_format }}
+                                </small>
+                                
+                                <form method="POST" 
+                                      action="{{ url_for('waitlist.leave_waitlist', waitlist_id=waitlist.waitlist_id) }}"
+                                      style="display: inline;"
+                                      onsubmit="return confirm('Remove yourself from this waitlist?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-x-circle"></i> Leave Waitlist
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            {% else %}
+            <div class="alert alert-info">
+                <h4><i class="bi bi-info-circle"></i> No Waitlists</h4>
+                <p class="mb-0">You're not currently on any waitlists. When a resource you want is fully booked, you can join the waitlist to be notified when a spot opens up!</p>
+            </div>
+            
+            <a href="{{ url_for('resources.list_resources') }}" class="btn btn-primary">
+                <i class="bi bi-search"></i> Browse Resources
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add datetime formatting
+    document.addEventListener('DOMContentLoaded', function() {
+        // Format datetime stamps
+        document.querySelectorAll('[data-datetime]').forEach(el => {
+            const datetime = new Date(el.getAttribute('data-datetime'));
+            el.textContent = datetime.toLocaleString();
+        });
+    });
+</script>
+{% endblock %}
+

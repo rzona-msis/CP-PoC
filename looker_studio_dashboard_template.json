@@ -1,0 +1,322 @@
+{
+  "dashboard_name": "Campus Resource Hub Analytics",
+  "description": "Comprehensive analytics dashboard for monitoring resource usage, bookings, and user engagement",
+  "data_sources": [
+    {
+      "name": "Resources Analytics",
+      "connector": "BigQuery",
+      "table": "resources_analytics",
+      "refresh_frequency": "daily"
+    },
+    {
+      "name": "Bookings Analytics",
+      "connector": "BigQuery",
+      "table": "bookings_analytics",
+      "refresh_frequency": "daily"
+    },
+    {
+      "name": "Resource Utilization",
+      "connector": "BigQuery",
+      "table": "resource_utilization",
+      "refresh_frequency": "daily"
+    },
+    {
+      "name": "User Engagement",
+      "connector": "BigQuery",
+      "table": "user_engagement",
+      "refresh_frequency": "daily"
+    }
+  ],
+  "pages": [
+    {
+      "name": "Overview",
+      "components": [
+        {
+          "type": "scorecard",
+          "title": "Total Resources",
+          "data_source": "Resources Analytics",
+          "metric": "COUNT(resource_id)",
+          "position": {"x": 0, "y": 0, "width": 3, "height": 2}
+        },
+        {
+          "type": "scorecard",
+          "title": "Total Bookings",
+          "data_source": "Bookings Analytics",
+          "metric": "COUNT(booking_id)",
+          "position": {"x": 3, "y": 0, "width": 3, "height": 2}
+        },
+        {
+          "type": "scorecard",
+          "title": "Average Rating",
+          "data_source": "Resources Analytics",
+          "metric": "AVG(average_rating)",
+          "format": "0.0",
+          "position": {"x": 6, "y": 0, "width": 3, "height": 2}
+        },
+        {
+          "type": "scorecard",
+          "title": "Avg Utilization Rate",
+          "data_source": "Resource Utilization",
+          "metric": "AVG(utilization_rate)",
+          "format": "0.0%",
+          "position": {"x": 9, "y": 0, "width": 3, "height": 2}
+        },
+        {
+          "type": "pie_chart",
+          "title": "Resources by Category",
+          "data_source": "Resources Analytics",
+          "dimension": "category",
+          "metric": "COUNT(resource_id)",
+          "colors": ["#990000", "#7a0000", "#CC0000", "#990033"],
+          "position": {"x": 0, "y": 2, "width": 6, "height": 4}
+        },
+        {
+          "type": "bar_chart",
+          "title": "Bookings by Status",
+          "data_source": "Bookings Analytics",
+          "dimension": "status",
+          "metric": "COUNT(booking_id)",
+          "colors": ["#990000"],
+          "position": {"x": 6, "y": 2, "width": 6, "height": 4}
+        },
+        {
+          "type": "time_series",
+          "title": "Daily Booking Trend (Last 30 Days)",
+          "data_source": "Bookings Analytics",
+          "dimension": "DATE(created_at)",
+          "metric": "COUNT(booking_id)",
+          "date_range": "Last 30 days",
+          "colors": ["#990000"],
+          "position": {"x": 0, "y": 6, "width": 12, "height": 4}
+        },
+        {
+          "type": "table",
+          "title": "Top 10 Most Booked Resources",
+          "data_source": "Resources Analytics",
+          "columns": [
+            {"field": "title", "label": "Resource Name"},
+            {"field": "category", "label": "Category"},
+            {"field": "total_bookings", "label": "Total Bookings", "type": "number"},
+            {"field": "average_rating", "label": "Rating", "type": "number", "format": "0.0"}
+          ],
+          "sort": {"field": "total_bookings", "direction": "DESC"},
+          "rows": 10,
+          "position": {"x": 0, "y": 10, "width": 12, "height": 5}
+        }
+      ]
+    },
+    {
+      "name": "Resource Utilization",
+      "components": [
+        {
+          "type": "heatmap",
+          "title": "Resource Utilization Heatmap",
+          "data_source": "Resource Utilization",
+          "rows": "resource_id",
+          "columns": "DATE(date)",
+          "metric": "utilization_rate",
+          "color_scale": {
+            "min": {"value": 0, "color": "#F2EFEA"},
+            "max": {"value": 100, "color": "#990000"}
+          },
+          "position": {"x": 0, "y": 0, "width": 12, "height": 6}
+        },
+        {
+          "type": "line_chart",
+          "title": "Utilization Rate by Category Over Time",
+          "data_source": "Resource Utilization",
+          "dimension": "DATE(date)",
+          "metric": "AVG(utilization_rate)",
+          "breakdown": "category",
+          "position": {"x": 0, "y": 6, "width": 12, "height": 5}
+        },
+        {
+          "type": "table",
+          "title": "Resource Utilization Summary",
+          "data_source": "Resource Utilization",
+          "columns": [
+            {"field": "resource_id", "label": "Resource ID"},
+            {"field": "total_bookings", "label": "Total Bookings"},
+            {"field": "approved_bookings", "label": "Approved"},
+            {"field": "total_hours_booked", "label": "Hours Booked", "format": "0.0"},
+            {"field": "utilization_rate", "label": "Utilization %", "format": "0.0%"}
+          ],
+          "position": {"x": 0, "y": 11, "width": 12, "height": 5}
+        }
+      ]
+    },
+    {
+      "name": "User Engagement",
+      "components": [
+        {
+          "type": "scorecard",
+          "title": "Total Active Users",
+          "data_source": "User Engagement",
+          "metric": "COUNT(DISTINCT user_id)",
+          "position": {"x": 0, "y": 0, "width": 4, "height": 2}
+        },
+        {
+          "type": "scorecard",
+          "title": "Total Bookings Created",
+          "data_source": "User Engagement",
+          "metric": "SUM(bookings_created)",
+          "position": {"x": 4, "y": 0, "width": 4, "height": 2}
+        },
+        {
+          "type": "scorecard",
+          "title": "Total Reviews",
+          "data_source": "User Engagement",
+          "metric": "SUM(reviews_written)",
+          "position": {"x": 8, "y": 0, "width": 4, "height": 2}
+        },
+        {
+          "type": "time_series",
+          "title": "Daily User Activity",
+          "data_source": "User Engagement",
+          "dimension": "DATE(date)",
+          "metrics": [
+            {"field": "SUM(bookings_created)", "label": "Bookings Created"},
+            {"field": "SUM(bookings_completed)", "label": "Bookings Completed"},
+            {"field": "SUM(reviews_written)", "label": "Reviews Written"}
+          ],
+          "position": {"x": 0, "y": 2, "width": 12, "height": 5}
+        },
+        {
+          "type": "bar_chart",
+          "title": "Top 10 Most Active Users",
+          "data_source": "User Engagement",
+          "dimension": "user_id",
+          "metric": "SUM(bookings_created)",
+          "sort": "DESC",
+          "rows": 10,
+          "position": {"x": 0, "y": 7, "width": 6, "height": 5}
+        },
+        {
+          "type": "bar_chart",
+          "title": "User Engagement by Activity Type",
+          "data_source": "User Engagement",
+          "dimension": "activity_type",
+          "metric": "COUNT(*)",
+          "position": {"x": 6, "y": 7, "width": 6, "height": 5}
+        }
+      ]
+    },
+    {
+      "name": "Booking Analytics",
+      "components": [
+        {
+          "type": "scorecard",
+          "title": "Total Bookings",
+          "data_source": "Bookings Analytics",
+          "metric": "COUNT(booking_id)",
+          "position": {"x": 0, "y": 0, "width": 3, "height": 2}
+        },
+        {
+          "type": "scorecard",
+          "title": "Approved Rate",
+          "data_source": "Bookings Analytics",
+          "metric": "COUNT(booking_id WHERE status = 'approved') / COUNT(booking_id)",
+          "format": "0.0%",
+          "position": {"x": 3, "y": 0, "width": 3, "height": 2}
+        },
+        {
+          "type": "scorecard",
+          "title": "Avg Booking Duration",
+          "data_source": "Bookings Analytics",
+          "metric": "AVG(duration_hours)",
+          "format": "0.0 hours",
+          "position": {"x": 6, "y": 0, "width": 3, "height": 2}
+        },
+        {
+          "type": "scorecard",
+          "title": "Calendar Sync Rate",
+          "data_source": "Bookings Analytics",
+          "metric": "COUNT(booking_id WHERE has_calendar_event = 1) / COUNT(booking_id)",
+          "format": "0.0%",
+          "position": {"x": 9, "y": 0, "width": 3, "height": 2}
+        },
+        {
+          "type": "time_series",
+          "title": "Booking Status Over Time",
+          "data_source": "Bookings Analytics",
+          "dimension": "DATE(created_at)",
+          "metric": "COUNT(booking_id)",
+          "breakdown": "status",
+          "stacked": true,
+          "position": {"x": 0, "y": 2, "width": 12, "height": 5}
+        },
+        {
+          "type": "bar_chart",
+          "title": "Booking Duration Distribution",
+          "data_source": "Bookings Analytics",
+          "dimension": "CASE WHEN duration_hours < 1 THEN '<1h' WHEN duration_hours < 2 THEN '1-2h' WHEN duration_hours < 4 THEN '2-4h' ELSE '4h+' END",
+          "metric": "COUNT(booking_id)",
+          "position": {"x": 0, "y": 7, "width": 6, "height": 5}
+        },
+        {
+          "type": "pie_chart",
+          "title": "Bookings by Day of Week",
+          "data_source": "Bookings Analytics",
+          "dimension": "EXTRACT(DAYOFWEEK FROM start_datetime)",
+          "metric": "COUNT(booking_id)",
+          "position": {"x": 6, "y": 7, "width": 6, "height": 5}
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "name": "Date Range",
+      "type": "date_range",
+      "default": "Last 30 days",
+      "applies_to": ["all_pages"]
+    },
+    {
+      "name": "Resource Category",
+      "type": "dropdown",
+      "field": "category",
+      "default": "All",
+      "applies_to": ["Overview", "Resource Utilization"]
+    },
+    {
+      "name": "Booking Status",
+      "type": "dropdown",
+      "field": "status",
+      "default": "All",
+      "applies_to": ["Booking Analytics"]
+    }
+  ],
+  "theme": {
+    "colors": {
+      "primary": "#990000",
+      "secondary": "#7a0000",
+      "accent": "#CC0000",
+      "background": "#F2EFEA",
+      "text": "#333333"
+    },
+    "fonts": {
+      "title": "Georgia",
+      "body": "Arial"
+    }
+  },
+  "sharing": {
+    "viewers": ["stakeholders@university.edu"],
+    "editors": ["admin@university.edu"],
+    "public": false
+  },
+  "refresh_schedule": {
+    "frequency": "daily",
+    "time": "02:00",
+    "timezone": "America/Indiana/Indianapolis"
+  },
+  "notes": [
+    "This is a template configuration for Looker Studio dashboard",
+    "Import your BigQuery data sources first",
+    "Customize colors to match Indiana University branding",
+    "Add additional filters and date ranges as needed",
+    "Consider creating separate dashboards for different user roles",
+    "Schedule data refreshes during off-peak hours",
+    "Monitor BigQuery costs and optimize queries as needed"
+  ]
+}
+

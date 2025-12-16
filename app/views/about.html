@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}About - Campus Resource Hub{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <article>
+            <h1 class="mb-4">About Campus Resource Hub</h1>
+            
+            <section aria-labelledby="mission-heading" class="mb-5">
+                <h2 id="mission-heading" class="h3">Our Mission</h2>
+                <p class="lead">
+                    Campus Resource Hub is a platform designed to facilitate the sharing and booking of campus resources 
+                    among students and staff, promoting collaboration and efficient resource utilization.
+                </p>
+            </section>
+            
+            <section aria-labelledby="features-heading" class="mb-5">
+                <h2 id="features-heading" class="h3">Key Features</h2>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h3 class="card-title h5">
+                                    <span aria-hidden="true">🔍</span> Resource Discovery
+                                </h3>
+                                <p class="card-text">
+                                    Browse and search through a wide variety of campus resources including study rooms, 
+                                    equipment, labs, and event spaces.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h3 class="card-title h5">
+                                    <span aria-hidden="true">📅</span> Easy Booking
+                                </h3>
+                                <p class="card-text">
+                                    Reserve resources with our intuitive booking system that automatically detects 
+                                    conflicts and manages approvals.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h3 class="card-title h5">
+                                    <span aria-hidden="true">💬</span> Direct Messaging
+                                </h3>
+                                <p class="card-text">
+                                    Communicate directly with resource owners to coordinate bookings and ask questions.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h3 class="card-title h5">
+                                    <span aria-hidden="true">⭐</span> Reviews & Ratings
+                                </h3>
+                                <p class="card-text">
+                                    Share your experiences and read reviews from other users to make informed decisions.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section aria-labelledby="accessibility-heading" class="mb-5">
+                <h2 id="accessibility-heading" class="h3">Commitment to Accessibility</h2>
+                <p>
+                    Campus Resource Hub is designed with accessibility at its core, meeting 
+                    <abbr title="Web Content Accessibility Guidelines">WCAG</abbr> 2.1 Level AA standards.
+                </p>
+                <ul>
+                    <li>Full keyboard navigation support</li>
+                    <li>Screen reader compatibility</li>
+                    <li>High contrast color schemes</li>
+                    <li>Semantic HTML structure</li>
+                    <li>ARIA labels and landmarks</li>
+                    <li>Responsive design for all devices</li>
+                </ul>
+                <p>
+                    If you experience any accessibility barriers, please contact us at 
+                    <a href="mailto:accessibility@campusresourcehub.edu">accessibility@campusresourcehub.edu</a>
+                </p>
+            </section>
+            
+            <section aria-labelledby="technology-heading" class="mb-5">
+                <h2 id="technology-heading" class="h3">Technology Stack</h2>
+                <p>Built with modern, secure web technologies:</p>
+                <ul>
+                    <li><strong>Backend:</strong> Python 3.10+ with Flask 3.0</li>
+                    <li><strong>Database:</strong> SQLite/PostgreSQL with SQLAlchemy ORM</li>
+                    <li><strong>Authentication:</strong> Flask-Login with bcrypt password hashing</li>
+                    <li><strong>Frontend:</strong> Bootstrap 5, semantic HTML5, accessible JavaScript</li>
+                    <li><strong>Security:</strong> CSRF protection, XSS prevention, SQL injection prevention</li>
+                </ul>
+            </section>
+            
+            <section aria-labelledby="roles-heading" class="mb-5">
+                <h2 id="roles-heading" class="h3">User Roles</h2>
+                
+                <h3 class="h5 mt-3">Students</h3>
+                <p>
+                    Browse resources, create bookings, send messages, and leave reviews to help the community.
+                </p>
+                
+                <h3 class="h5 mt-3">Staff</h3>
+                <p>
+                    Create and manage resources, approve booking requests, and engage with the campus community.
+                </p>
+                
+                <h3 class="h5 mt-3">Administrators</h3>
+                <p>
+                    Oversee platform operations, manage users, moderate content, and ensure smooth operation.
+                </p>
+            </section>
+            
+            <section aria-labelledby="contact-heading" class="mb-5">
+                <h2 id="contact-heading" class="h3">Contact & Support</h2>
+                <address>
+                    <p>
+                        <strong>General Inquiries:</strong><br>
+                        <a href="mailto:info@campusresourcehub.edu">info@campusresourcehub.edu</a>
+                    </p>
+                    <p>
+                        <strong>Technical Support:</strong><br>
+                        <a href="mailto:support@campusresourcehub.edu">support@campusresourcehub.edu</a>
+                    </p>
+                    <p>
+                        <strong>Accessibility:</strong><br>
+                        <a href="mailto:accessibility@campusresourcehub.edu">accessibility@campusresourcehub.edu</a>
+                    </p>
+                </address>
+            </section>
+            
+            <section aria-labelledby="project-heading">
+                <h2 id="project-heading" class="h3">Project Information</h2>
+                <p>
+                    Campus Resource Hub was developed as part of the AiDD (AI-Driven Development) 2025 Capstone Project 
+                    at Indiana University, demonstrating the effective use of AI assistance in modern web development 
+                    while maintaining high standards for accessibility, security, and user experience.
+                </p>
+                <p class="text-muted">
+                    <small>Version 1.0 | Last Updated: November 9, 2025</small>
+                </p>
+            </section>
+        </article>
+    </div>
+</div>
+{% endblock %}

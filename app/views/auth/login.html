@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Campus Resource Hub{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <h1 class="card-title text-center mb-4">Login</h1>
+                
+                <form method="POST" action="{{ url_for('auth.login') }}" novalidate aria-label="Login form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">
+                            Email Address <span class="text-danger" aria-label="required">*</span>
+                        </label>
+                        <input type="email" 
+                               class="form-control" 
+                               id="email" 
+                               name="email" 
+                               required 
+                               autofocus
+                               autocomplete="email"
+                               aria-required="true"
+                               aria-describedby="email-help">
+                        <small id="email-help" class="form-text text-muted">
+                            Enter your registered email address
+                        </small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            Password <span class="text-danger" aria-label="required">*</span>
+                        </label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               name="password" 
+                               required
+                               autocomplete="current-password"
+                               aria-required="true">
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" 
+                               class="form-check-input" 
+                               id="remember" 
+                               name="remember">
+                        <label class="form-check-label" for="remember">
+                            Remember me
+                        </label>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            Login
+                        </button>
+                    </div>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="mb-0">Don't have an account? 
+                        <a href="{{ url_for('auth.register') }}">Register here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

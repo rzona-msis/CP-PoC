@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Resources - Campus Resource Hub{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>Browse Resources</h1>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<section aria-labelledby="filter-heading" class="mb-4">
+    <h2 id="filter-heading" class="visually-hidden">Filter Resources</h2>
+    <form method="get" role="search" class="row g-3">
+        <div class="col-md-4">
+            <label for="category-filter" class="form-label">Category</label>
+            <select class="form-select" id="category-filter" name="category">
+                <option value="">All Categories</option>
+                <option value="study_room" {% if request.args.get('category') == 'study_room' %}selected{% endif %}>Study Rooms</option>
+                <option value="equipment" {% if request.args.get('category') == 'equipment' %}selected{% endif %}>Equipment</option>
+                <option value="lab" {% if request.args.get('category') == 'lab' %}selected{% endif %}>Labs</option>
+                <option value="event_space" {% if request.args.get('category') == 'event_space' %}selected{% endif %}>Event Spaces</option>
+                <option value="tutoring" {% if request.args.get('category') == 'tutoring' %}selected{% endif %}>Tutoring</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="search-query" class="form-label">Search</label>
+            <input type="text" class="form-control" id="search-query" name="q" 
+                   value="{{ query or '' }}" placeholder="Search resources...">
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary">Apply Filters</button>
+        </div>
+    </form>
+</section>
+
+<!-- Resources Grid -->
+<section aria-labelledby="resources-heading">
+    <h2 id="resources-heading" class="visually-hidden">Available Resources</h2>
+    
+    {% if resources %}
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for resource in resources %}
+        <div class="col">
+            <article class="card h-100" aria-labelledby="resource-{{ resource.resource_id }}-title">
+                {% if resource.images %}
+                <img src="{{ resource.images.split(',')[0] }}" class="card-img-top" 
+                     alt="Image of {{ resource.title }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" 
+                     style="height: 200px;" role="img" aria-label="No image available">
+                    <span aria-hidden="true" style="font-size: 3rem;">📦</span>
+                </div>
+                {% endif %}
+                
+                <div class="card-body">
+                    <h3 id="resource-{{ resource.resource_id }}-title" class="card-title h5">
+                        {{ resource.title }}
+                    </h3>
+                    <p class="card-text">{{ resource.description[:100] }}{% if resource.description|length > 100 %}...{% endif %}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-info">{{ resource.category|replace('_', ' ')|title }}</span>
+                        <span class="text-muted small">
+                            <span aria-hidden="true">📍</span> {{ resource.location }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('resources.detail', resource_id=resource.resource_id) }}" 
+                       class="btn btn-sm btn-outline-primary stretched-link"
+                       aria-label="View details for {{ resource.title }}">
+                        View Details
+                    </a>
+                </div>
+            </article>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info" role="status">
+        <p class="mb-0">No resources found. Try adjusting your search criteria.</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

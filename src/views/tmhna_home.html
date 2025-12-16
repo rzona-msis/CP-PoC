@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}TMHNA Financial AI Assistant{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Hero Section -->
+    <div class="jumbotron bg-light p-5 rounded-3 mb-5">
+        <h1 class="display-4">🤖 TMHNA Financial AI Assistant</h1>
+        <p class="lead">
+            Leverage AI to unify financial insights and accelerate decision-making across fragmented systems.
+        </p>
+        <hr class="my-4">
+        <p>
+            Toyota Material Handling North America operates across multiple acquired entities with
+            fragmented financial and sales systems. This AI-powered platform demonstrates how to:
+        </p>
+        <ul class="lead">
+            <li>Analyze financial data using natural language queries</li>
+            <li>Detect anomalies and variance automatically</li>
+            <li>Identify and merge duplicate master data records</li>
+            <li>Create unified "golden records" across systems</li>
+        </ul>
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="row g-4 mb-5">
+        <!-- Financial Analysis Card -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm hover-lift">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="bi bi-graph-up-arrow"></i> AI Financial Analysis
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-subtitle mb-3 text-muted">Natural Language Queries</h5>
+                    <p class="card-text">
+                        Ask questions in plain English and get instant analysis with:
+                    </p>
+                    <ul>
+                        <li>Automated SQL query generation</li>
+                        <li>Anomaly detection and alerts</li>
+                        <li>Variance analysis by region/product</li>
+                        <li>Executive-level AI summaries</li>
+                    </ul>
+                    <div class="alert alert-info mt-3">
+                        <strong>Example queries:</strong><br>
+                        <small>
+                            • "Explain margin erosion for Q2 by region"<br>
+                            • "Which products had highest revenue in July?"<br>
+                            • "Compare online vs retail sales performance"
+                        </small>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('financial.analysis_page') }}" class="btn btn-primary w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Launch Financial Analysis
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Master Data Matching Card -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm hover-lift">
+                <div class="card-header bg-success text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="bi bi-diagram-3"></i> AI Master Data Matching
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-subtitle mb-3 text-muted">Duplicate Detection & Resolution</h5>
+                    <p class="card-text">
+                        Identify and merge duplicate records across systems with:
+                    </p>
+                    <ul>
+                        <li>Rule-based fuzzy matching</li>
+                        <li>AI-powered confidence scoring</li>
+                        <li>Golden record recommendations</li>
+                        <li>Approval workflow for data quality</li>
+                    </ul>
+                    <div class="alert alert-warning mt-3">
+                        <strong>Detects duplicates in:</strong><br>
+                        <small>
+                            • Customer records (SAP/Oracle/Legacy)<br>
+                            • Vendor information<br>
+                            • Product master data
+                        </small>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('master_data.matching_page') }}" class="btn btn-success w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Launch Master Data Matching
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Overview -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0"><i class="bi bi-info-circle"></i> System Overview</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h5>🗄️ Data Sources</h5>
+                            <ul class="list-unstyled">
+                                <li><span class="badge bg-primary">SAP</span> Financial Transactions</li>
+                                <li><span class="badge bg-info">Oracle</span> Product Master</li>
+                                <li><span class="badge bg-secondary">Legacy</span> Customer/Vendor Data</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>🤖 AI Capabilities</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success"></i> Natural Language to SQL</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Anomaly Detection</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Duplicate Scoring</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Golden Record Generation</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>📊 Demo Data</h5>
+                            <ul class="list-unstyled">
+                                <li>6 months of financial data</li>
+                                <li>Q2 2024 margin anomalies</li>
+                                <li>Intentional duplicates seeded</li>
+                                <li>Multi-region transactions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technology Stack -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="bi bi-stack"></i> Technology Stack</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-2">
+                            <div class="p-3">
+                                <i class="bi bi-filetype-html display-4 text-primary"></i>
+                                <p class="mb-0"><strong>HTML/Jinja</strong></p>
+                                <small class="text-muted">Templating</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="p-3">
+                                <i class="bi bi-bootstrap display-4 text-purple"></i>
+                                <p class="mb-0"><strong>Bootstrap 5</strong></p>
+                                <small class="text-muted">UI Framework</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="p-3">
+                                <i class="bi bi-cup-hot display-4 text-success"></i>
+                                <p class="mb-0"><strong>Flask</strong></p>
+                                <small class="text-muted">Backend</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="p-3">
+                                <i class="bi bi-database display-4 text-info"></i>
+                                <p class="mb-0"><strong>SQLite</strong></p>
+                                <small class="text-muted">Database</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="p-3">
+                                <i class="bi bi-robot display-4 text-warning"></i>
+                                <p class="mb-0"><strong>LLM APIs</strong></p>
+                                <small class="text-muted">OpenAI/Anthropic</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="p-3">
+                                <i class="bi bi-graph-up display-4 text-danger"></i>
+                                <p class="mb-0"><strong>Chart.js</strong></p>
+                                <small class="text-muted">Visualization</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-lift {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+}
+
+.jumbotron {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.jumbotron hr {
+    border-color: rgba(255,255,255,0.3);
+}
+</style>
+{% endblock %}
