@@ -444,21 +444,24 @@ function setupSearchAndFilters() {
     
     // Check if all elements exist
     if (!searchInput || !fieldFilter || !confidenceFilter) {
-        console.error('Search/filter elements not found');
+        console.error('Search/filter elements not found', {
+            searchInput: !!searchInput,
+            fieldFilter: !!fieldFilter,
+            confidenceFilter: !!confidenceFilter
+        });
         return;
     }
     
-    // Remove any existing listeners
-    searchInput.replaceWith(searchInput.cloneNode(true));
-    fieldFilter.replaceWith(fieldFilter.cloneNode(true));
-    confidenceFilter.replaceWith(confidenceFilter.cloneNode(true));
+    // Remove old event listeners by cloning and replacing
+    const newSearchInput = searchInput.cloneNode(true);
+    const newFieldFilter = fieldFilter.cloneNode(true);
+    const newConfidenceFilter = confidenceFilter.cloneNode(true);
     
-    // Get fresh references
-    const newSearchInput = document.getElementById('searchInput');
-    const newFieldFilter = document.getElementById('fieldFilter');
-    const newConfidenceFilter = document.getElementById('confidenceFilter');
+    searchInput.parentNode.replaceChild(newSearchInput, searchInput);
+    fieldFilter.parentNode.replaceChild(newFieldFilter, fieldFilter);
+    confidenceFilter.parentNode.replaceChild(newConfidenceFilter, confidenceFilter);
     
-    // Add event listeners
+    // Add event listeners to new elements
     const applyFilters = () => filterAndDisplayDuplicates();
     
     newSearchInput.addEventListener('input', applyFilters);
