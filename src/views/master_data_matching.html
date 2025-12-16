@@ -179,6 +179,10 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
     const resultsPanel = document.getElementById('resultsPanel');
     const findBtn = document.getElementById('findBtn');
     
+    // Reset previous results
+    window.originalDuplicates = [];
+    window.currentEntityType = null;
+    
     loadingSpinner.style.display = 'block';
     resultsPanel.style.display = 'none';
     findBtn.disabled = true;
@@ -229,13 +233,21 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
             }
         } else {
             alert('Error: ' + (data.error || 'Unknown error occurred'));
+            // Clear results on error
+            resultsPanel.style.display = 'none';
         }
     } catch (error) {
         console.error('Request error:', error);
         alert('Request failed: ' + error.message);
+        // Clear results on error
+        resultsPanel.style.display = 'none';
     } finally {
         loadingSpinner.style.display = 'none';
         findBtn.disabled = false;
+        // Re-enable form inputs
+        document.getElementById('entityType').disabled = false;
+        document.getElementById('threshold').disabled = false;
+        document.getElementById('useLLM').disabled = false;
     }
 });
 

@@ -44,6 +44,7 @@ class MasterDataDAL:
         if limit:
             query += f" LIMIT {limit}"
         
+        conn = None
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
@@ -52,12 +53,14 @@ class MasterDataDAL:
             rows = cursor.fetchall()
             results = [dict(row) for row in rows]
             
-            conn.close()
             return results
         except Exception as e:
             # Database connection failed - return empty results
             print(f"WARNING: Database connection failed in get_entities_by_type: {e}")
             return []
+        finally:
+            if conn:
+                conn.close()
     
     def find_potential_duplicates(
         self, 
