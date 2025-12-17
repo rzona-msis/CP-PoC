@@ -257,18 +257,6 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
                     });
                 }
             }, 50); // Small delay to let browser render
-                
-                // Set up search and filter event listeners
-                setupSearchAndFilters();
-                
-                // Scroll to results
-                resultsPanel.scrollIntoView({ behavior: 'smooth' });
-            } else {
-                console.error('Required DOM elements not found', {
-                    countElement: !!countElement,
-                    listElement: !!listElement
-                });
-            }
         } else {
             alert('Error: ' + (data.error || 'Unknown error occurred'));
             // Clear results on error
