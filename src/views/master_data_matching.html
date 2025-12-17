@@ -213,12 +213,24 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
         const data = await response.json();
         
         if (data.success) {
+            console.log('=== Before accessing elements ===');
+            console.log('resultsPanel display:', resultsPanel.style.display);
+            console.log('resultsPanel in DOM:', document.body.contains(resultsPanel));
+            
             // Show results panel FIRST - must be visible before we can access child elements
             resultsPanel.style.display = 'block';
+            
+            console.log('=== After setting display block ===');
+            console.log('resultsPanel display:', resultsPanel.style.display);
             
             // Access elements directly since panel is now visible
             const countElement = document.getElementById('duplicateCount');
             const listElement = document.getElementById('duplicatesList');
+            
+            console.log('=== Element lookup results ===');
+            console.log('countElement:', countElement);
+            console.log('listElement:', listElement);
+            console.log('countElement in DOM:', countElement ? document.body.contains(countElement) : 'null');
             
             if (countElement && listElement) {
                 countElement.textContent = data.duplicate_count || 0;
