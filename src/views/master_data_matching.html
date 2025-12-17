@@ -213,43 +213,50 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
         const data = await response.json();
         
         if (data.success) {
-            // CACHE BUST v2 - Force browser to reload this code
-            console.log('=== CACHE BUST VERSION 2 - Starting element access ===');
-            console.log('resultsPanel display:', resultsPanel.style.display);
-            console.log('resultsPanel in DOM:', document.body.contains(resultsPanel));
-            
-            // Show results panel FIRST - must be visible before we can access child elements
+            // Show results panel FIRST
             resultsPanel.style.display = 'block';
             
-            console.log('=== After setting display block ===');
-            console.log('resultsPanel display:', resultsPanel.style.display);
-            
-            // Use querySelector on the panel itself instead of getElementById on document
-            const countElement = resultsPanel.querySelector('#duplicateCount');
-            const listElement = resultsPanel.querySelector('#duplicatesList');
-            
-            console.log('=== Element lookup results (using querySelector) ===');
-            console.log('countElement:', countElement);
-            console.log('listElement:', listElement);
-            console.log('countElement in DOM:', countElement ? document.body.contains(countElement) : 'null');
-            
-            if (countElement && listElement) {
-                countElement.textContent = data.duplicate_count || 0;
+            // Use setTimeout to ensure browser has rendered the visible panel
+            setTimeout(() => {
+                console.log('=== TIMEOUT VERSION - Accessing elements after render ===');
                 
-                // Store original duplicates data globally
-                window.originalDuplicates = data.duplicates || [];
-                window.currentEntityType = entityType;
+                // Use querySelector on the panel itself
+                const countElement = resultsPanel.querySelector('#duplicateCount');
+                const listElement = resultsPanel.querySelector('#duplicatesList');
                 
-                // Populate field filter dropdown based on entity type
-                populateFieldFilter(entityType);
+                console.log('countElement:', countElement);
+                console.log('listElement:', listElement);
                 
-                displayDuplicates(window.originalDuplicates, entityType);
-                
-                // Show the search field after finding duplicates
-                const searchFieldContainer = document.getElementById('searchFieldContainer');
-                if (searchFieldContainer) {
-                    searchFieldContainer.style.display = 'block';
+                if (countElement && listElement) {
+                    countElement.textContent = data.duplicate_count || 0;
+                    
+                    // Store original duplicates data globally
+                    window.originalDuplicates = data.duplicates || [];
+                    window.currentEntityType = entityType;
+                    
+                    // Populate field filter dropdown based on entity type
+                    populateFieldFilter(entityType);
+                    
+                    displayDuplicates(window.originalDuplicates, entityType);
+                    
+                    // Show the search field after finding duplicates
+                    const searchFieldContainer = document.getElementById('searchFieldContainer');
+                    if (searchFieldContainer) {
+                        searchFieldContainer.style.display = 'block';
+                    }
+                    
+                    // Set up search and filter event listeners
+                    setupSearchAndFilters();
+                    
+                    // Scroll to results
+                    resultsPanel.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    console.error('Required DOM elements not found', {
+                        countElement: !!countElement,
+                        listElement: !!listElement
+                    });
                 }
+            }, 50); // Small delay to let browser render
                 
                 // Set up search and filter event listeners
                 setupSearchAndFilters();
