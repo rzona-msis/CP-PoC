@@ -215,54 +215,56 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
             // Show results panel FIRST - must be visible before we can access child elements
             resultsPanel.style.display = 'block';
             
-            const countElement = document.getElementById('duplicateCount');
-            const listElement = document.getElementById('duplicatesList');
-            
-            if (countElement && listElement) {
-                countElement.textContent = data.duplicate_count || 0;
+            // Wait for browser to render the visible panel before accessing elements
+            requestAnimationFrame(() => {
+                const countElement = document.getElementById('duplicateCount');
+                const listElement = document.getElementById('duplicatesList');
                 
-                // Store original duplicates data globally
-                window.originalDuplicates = data.duplicates || [];
-                window.currentEntityType = entityType;
-                
-                // Populate field filter dropdown based on entity type
-                populateFieldFilter(entityType);
-                
-                displayDuplicates(window.originalDuplicates, entityType);
-                
-                // Show the search field after finding duplicates
-                const searchFieldContainer = document.getElementById('searchFieldContainer');
-                if (searchFieldContainer) {
-                    searchFieldContainer.style.display = 'block';
-                }
-                
-                // Set up search and filter event listeners only if elements exist
-                // Wait for DOM to be fully visible before setting up
-                requestAnimationFrame(() => {
-                    const searchInput = document.getElementById('searchInput');
-                    const fieldFilter = document.getElementById('fieldFilter');
-                    const confidenceFilter = document.getElementById('confidenceFilter');
+                if (countElement && listElement) {
+                    countElement.textContent = data.duplicate_count || 0;
                     
-                    if (searchInput && fieldFilter && confidenceFilter) {
-                        setupSearchAndFilters();
-                        // Scroll after setup is complete
-                        resultsPanel.scrollIntoView({ behavior: 'smooth' });
-                    } else {
-                        console.error('Filter elements not found after display', {
-                            searchInput: !!searchInput,
-                            fieldFilter: !!fieldFilter,
-                            confidenceFilter: !!confidenceFilter
-                        });
-                        // Still scroll even if filters fail
-                        resultsPanel.scrollIntoView({ behavior: 'smooth' });
+                    // Store original duplicates data globally
+                    window.originalDuplicates = data.duplicates || [];
+                    window.currentEntityType = entityType;
+                    
+                    // Populate field filter dropdown based on entity type
+                    populateFieldFilter(entityType);
+                    
+                    displayDuplicates(window.originalDuplicates, entityType);
+                    
+                    // Show the search field after finding duplicates
+                    const searchFieldContainer = document.getElementById('searchFieldContainer');
+                    if (searchFieldContainer) {
+                        searchFieldContainer.style.display = 'block';
                     }
-                });
-            } else {
-                console.error('Required DOM elements not found', {
-                    countElement: !!countElement,
-                    listElement: !!listElement
-                });
-            }
+                    
+                    // Set up search and filter event listeners - use another frame for extra safety
+                    requestAnimationFrame(() => {
+                        const searchInput = document.getElementById('searchInput');
+                        const fieldFilter = document.getElementById('fieldFilter');
+                        const confidenceFilter = document.getElementById('confidenceFilter');
+                        
+                        if (searchInput && fieldFilter && confidenceFilter) {
+                            setupSearchAndFilters();
+                            // Scroll after setup is complete
+                            resultsPanel.scrollIntoView({ behavior: 'smooth' });
+                        } else {
+                            console.error('Filter elements not found after display', {
+                                searchInput: !!searchInput,
+                                fieldFilter: !!fieldFilter,
+                                confidenceFilter: !!confidenceFilter
+                            });
+                            // Still scroll even if filters fail
+                            resultsPanel.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    });
+                } else {
+                    console.error('Required DOM elements not found', {
+                        countElement: !!countElement,
+                        listElement: !!listElement
+                    });
+                }
+            });
         } else {
             alert('Error: ' + (data.error || 'Unknown error occurred'));
             // Clear results on error
