@@ -212,6 +212,9 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
         const data = await response.json();
         
         if (data.success) {
+            // Show results panel FIRST - must be visible before we can access child elements
+            resultsPanel.style.display = 'block';
+            
             const countElement = document.getElementById('duplicateCount');
             const listElement = document.getElementById('duplicatesList');
             
@@ -226,9 +229,6 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
                 populateFieldFilter(entityType);
                 
                 displayDuplicates(window.originalDuplicates, entityType);
-                
-                // Show results panel BEFORE trying to set up filters
-                resultsPanel.style.display = 'block';
                 
                 // Show the search field after finding duplicates
                 const searchFieldContainer = document.getElementById('searchFieldContainer');
