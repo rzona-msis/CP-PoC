@@ -213,7 +213,8 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
         const data = await response.json();
         
         if (data.success) {
-            console.log('=== Before accessing elements ===');
+            // CACHE BUST v2 - Force browser to reload this code
+            console.log('=== CACHE BUST VERSION 2 - Starting element access ===');
             console.log('resultsPanel display:', resultsPanel.style.display);
             console.log('resultsPanel in DOM:', document.body.contains(resultsPanel));
             
@@ -223,11 +224,11 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
             console.log('=== After setting display block ===');
             console.log('resultsPanel display:', resultsPanel.style.display);
             
-            // Access elements directly since panel is now visible
-            const countElement = document.getElementById('duplicateCount');
-            const listElement = document.getElementById('duplicatesList');
+            // Use querySelector on the panel itself instead of getElementById on document
+            const countElement = resultsPanel.querySelector('#duplicateCount');
+            const listElement = resultsPanel.querySelector('#duplicatesList');
             
-            console.log('=== Element lookup results ===');
+            console.log('=== Element lookup results (using querySelector) ===');
             console.log('countElement:', countElement);
             console.log('listElement:', listElement);
             console.log('countElement in DOM:', countElement ? document.body.contains(countElement) : 'null');
