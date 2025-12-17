@@ -222,17 +222,28 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
                 console.log('=== TIMEOUT VERSION - Accessing elements after render ===');
                 console.log('resultsPanel HTML:', resultsPanel.innerHTML.substring(0, 500));
                 
-                // Use querySelector on the panel itself
-                const countElement = resultsPanel.querySelector('#duplicateCount');
+                // Try to find existing elements
+                let countElement = resultsPanel.querySelector('#duplicateCount');
                 const listElement = resultsPanel.querySelector('#duplicatesList');
+                let countElement2 = document.getElementById('duplicateCount');
                 
-                // Also try document.getElementById as fallback
-                const countElement2 = document.getElementById('duplicateCount');
-                
-                console.log('countElement (querySelector):', countElement);
                 console.log('countElement (querySelector):', countElement);
                 console.log('countElement (getElementById):', countElement2);
                 console.log('listElement:', listElement);
+                
+                // If countElement doesn't exist, recreate it
+                if (!countElement && !countElement2) {
+                    console.warn('duplicateCount element missing - recreating');
+                    const cardBody = resultsPanel.querySelector('.sp-card-body');
+                    if (cardBody) {
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-info mb-3';
+                        alertDiv.innerHTML = '<strong>Found <span id="duplicateCount">0</span> potential duplicate pairs</strong>';
+                        cardBody.insertBefore(alertDiv, cardBody.firstChild);
+                        countElement2 = document.getElementById('duplicateCount');
+                        console.log('Recreated countElement:', countElement2);
+                    }
+                }
                 
                 // Use whichever method finds the element
                 const finalCountElement = countElement || countElement2;
