@@ -220,16 +220,25 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
             // Use setTimeout to ensure browser has rendered the visible panel
             setTimeout(() => {
                 console.log('=== TIMEOUT VERSION - Accessing elements after render ===');
+                console.log('resultsPanel HTML:', resultsPanel.innerHTML.substring(0, 500));
                 
                 // Use querySelector on the panel itself
                 const countElement = resultsPanel.querySelector('#duplicateCount');
                 const listElement = resultsPanel.querySelector('#duplicatesList');
                 
-                console.log('countElement:', countElement);
+                // Also try document.getElementById as fallback
+                const countElement2 = document.getElementById('duplicateCount');
+                
+                console.log('countElement (querySelector):', countElement);
+                console.log('countElement (querySelector):', countElement);
+                console.log('countElement (getElementById):', countElement2);
                 console.log('listElement:', listElement);
                 
-                if (countElement && listElement) {
-                    countElement.textContent = data.duplicate_count || 0;
+                // Use whichever method finds the element
+                const finalCountElement = countElement || countElement2;
+                
+                if (finalCountElement && listElement) {
+                    finalCountElement.textContent = data.duplicate_count || 0;
                     
                     // Store original duplicates data globally
                     window.originalDuplicates = data.duplicates || [];
@@ -253,7 +262,7 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
                     resultsPanel.scrollIntoView({ behavior: 'smooth' });
                 } else {
                     console.error('Required DOM elements not found', {
-                        countElement: !!countElement,
+                        countElement: !!finalCountElement,
                         listElement: !!listElement
                     });
                 }
