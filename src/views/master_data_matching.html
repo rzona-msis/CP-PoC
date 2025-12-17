@@ -234,14 +234,20 @@ document.getElementById('duplicateForm').addEventListener('submit', async functi
                 // If countElement doesn't exist, recreate it
                 if (!countElement && !countElement2) {
                     console.warn('duplicateCount element missing - recreating');
+                    console.log('Looking for .sp-card-body in resultsPanel');
                     const cardBody = resultsPanel.querySelector('.sp-card-body');
+                    console.log('cardBody found:', !!cardBody);
                     if (cardBody) {
+                        console.log('Creating new alert div');
                         const alertDiv = document.createElement('div');
                         alertDiv.className = 'alert alert-info mb-3';
                         alertDiv.innerHTML = '<strong>Found <span id="duplicateCount">0</span> potential duplicate pairs</strong>';
                         cardBody.insertBefore(alertDiv, cardBody.firstChild);
-                        countElement2 = document.getElementById('duplicateCount');
-                        console.log('Recreated countElement:', countElement2);
+                        countElement = document.getElementById('duplicateCount');
+                        countElement2 = countElement;
+                        console.log('Recreated countElement:', countElement);
+                    } else {
+                        console.error('Could not find .sp-card-body to insert alert');
                     }
                 }
                 
